@@ -9,7 +9,7 @@ nvm use            # Node 24 (.nvmrc)
 npm install
 cp .env.example .env.local
 make run           # http://localhost:3000
-make build         # production build
+make build         # static export into docs/ (GitHub Pages)
 ```
 
 ### Environment
@@ -126,8 +126,15 @@ Check with Lighthouse in a foreground tab: hidden tabs do not report LCP correct
 
 ## Redirects
 
-`next.config.ts` sends 301s: `/about-us` → `/#story`, `/services` and `/business-plan-writing` → `/#capabilities`, `/team` → `/#leadership`, `/contact-us` → `/#contact`.
+Old URLs (`lib/legacy.ts`): `/about-us` → `/#story`, `/services` and `/business-plan-writing` → `/#capabilities`, `/team` → `/#leadership`, `/contact-us` → `/#contact`. Server build: 301 from `next.config.ts`. Static export: redirect page from `app/[legacy]/page.tsx`.
 
 ## Deploy
 
-`make deploy` builds, commits on `main` and pushes. Vercel deploys from `main`.
+The site is published with GitHub Pages from the `docs/` folder on `main` (custom domain `artis-ventures.com`).
+
+| Command | Does |
+|---|---|
+| `make build` | Static export (`npm run export`, `STATIC_EXPORT=1`) into `out/`, then copies it to `docs/` with `CNAME` and `.nojekyll`. |
+| `make deploy` | `make build`, then commits everything on `main` and pushes. |
+
+In the static export, redirects and headers from `next.config.ts` do not apply. The old URLs (`lib/legacy.ts`) become instant-redirect pages instead, and images are served unoptimised. `npm run build` still makes a normal server build (for example, for Vercel) with the real 301s and security headers.

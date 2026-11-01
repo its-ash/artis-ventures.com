@@ -1,18 +1,13 @@
 import type { NextConfig } from 'next'
+import { legacy } from './lib/legacy'
 
-const moved = [
-  ['/about-us', '/#story'],
-  ['/services', '/#capabilities'],
-  ['/business-plan-writing', '/#capabilities'],
-  ['/team', '/#leadership'],
-  ['/contact-us', '/#contact'],
-] as const
+// STATIC_EXPORT=1 builds a static site for GitHub Pages (`make build` → docs/).
+// Static hosting cannot send redirects or headers, so they apply only to the server build.
+const exporting = process.env.STATIC_EXPORT === '1'
 
-const config: NextConfig = {
-  reactStrictMode: true,
-  poweredByHeader: false,
+const server: NextConfig = {
   async redirects() {
-    return moved.map(([source, destination]) => ({ source, destination, statusCode: 301 }))
+    return Object.entries(legacy).map(([slug, destination]) => ({ source: `/${slug}`, destination, statusCode: 301 }))
   },
   async headers() {
     return [
@@ -31,6 +26,12 @@ const config: NextConfig = {
       },
     ]
   },
+}
+
+const config: NextConfig = {
+  reactStrictMode: true,
+  poweredByHeader: false,
+  ...(exporting ? { output: 'export', trailingSlash: true, images: { unoptimized: true } } : server),
 }
 
 export default config

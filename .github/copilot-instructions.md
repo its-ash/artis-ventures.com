@@ -1,7 +1,7 @@
 # Artis Ventures — project instructions
 
 ## Stack
-- Next.js 16 (App Router) + TypeScript + Tailwind CSS 4. Host: Vercel.
+- Next.js 16 (App Router) + TypeScript + Tailwind CSS 4. Host: GitHub Pages (static export in `docs/`).
 - 3D: React Three Fiber, drei, postprocessing. Motion: GSAP 3 (ScrollTrigger, SplitText, `@gsap/react`), Lenis on desktop only.
 - Shared scene state: zustand.
 
@@ -17,5 +17,6 @@
 
 ## Commands
 - `make run` — dev server
-- `make build` — production build
-- `make deploy` — build, commit on `main`, push (Vercel deploys from `main`)
+- `make build` — static export into `docs/` (GitHub Pages, custom domain via `docs/CNAME`)
+- `make deploy` — build, commit on `main`, push
+- `npm run build` — server build (real 301s and headers), for example for Vercel

@@ -1,0 +1,26 @@
+2:"$Sreact.fragment"
+3:"/_next/static/chunks/2062ox2cya33n.js"
+4:I[39756,["$3"],"default"]
+5:I[37457,["$3"],"default"]
+a:I[22016,["$3"],""]
+b:I[97367,["$3"],"OutletBoundary"]
+c:"$Sreact.suspense"
+f:"ViewportBoundary"
+10:I[97367,["$3"],"$f"]
+11:"MetadataBoundary"
+12:I[97367,["$3"],"$11"]
+13:I[27201,["$3"],"IconMark"]
+7:X
+7:C
+8:X
+9:[["children",{"s":"__PAGE__","h":160,"d":{"r":["$","$2","c",{"children":[["$","section",null,{"data-tone":"dark","className":"tone gridlines min-h-[80svh] pb-28 pt-[calc(var(--header-h)+6rem)]","children":["$","div",null,{"className":"shell","children":[["$","h1",null,{"className":"display h-xl","children":"Opportunities"}],["$","p",null,{"className":"prose-w mt-10 text-muted","children":"TODO: client to supply Opportunities copy."}],["$","$La",null,{"href":"/","className":"label link-u mt-12 inline-block","children":"Back to home"}]]}]}],null,["$","$Lb",null,{"children":["$","$c",null,{"name":"Next.MetadataOutlet","children":"$@d"}]}]]}],"p":"$@e","v":null,"s":"$8"}}]]
+1:[["children",{"s":"affiliate-program","h":64,"d":{"r":["$","$2","c",{"children":[null,["$","$L4",null,{"parallelRouterKey":"children","template":["$","$L5",null,{}]}]]}],"p":"$@6","v":"$7","s":"$8"},"c":"$Q9"}]]
+0:{"t":{"t":{"s":"","h":16,"c":"$Q1"},"h":{"r":["$","$2","h",{"children":[null,["$","$L10",null,{"children":[["$","meta","0",{"charSet":"utf-8"}],["$","meta","1",{"name":"viewport","content":"width=device-width, initial-scale=1"}],["$","meta","2",{"name":"theme-color","content":"#0c0e11"}],["$","meta","3",{"name":"color-scheme","content":"dark light"}]]}],["$","$L12",null,{"children":[["$","div",null,{"hidden":true,"children":["$","$c",null,{"name":"Next.Metadata","children":[["$","title","0",{"children":"Opportunities — Artis Ventures LLC-FZ"}],["$","meta","1",{"name":"description","content":"A 360° global business builder assisting financial institutions, fintechs and entrepreneurs establish, scale and expand across global financial markets — with a long-term public-listing ambition."}],["$","meta","2",{"name":"robots","content":"index, follow"}],["$","link","3",{"rel":"canonical","href":"https://artis-ventures.com/affiliate-program/"}],["$","meta","4",{"property":"og:title","content":"Artis Ventures LLC-FZ — Gateway to Excellence"}],["$","meta","5",{"property":"og:description","content":"A 360° global business builder assisting financial institutions, fintechs and entrepreneurs establish, scale and expand across global financial markets — with a long-term public-listing ambition."}],["$","meta","6",{"property":"og:url","content":"https://artis-ventures.com/"}],["$","meta","7",{"property":"og:site_name","content":"Artis Ventures LLC-FZ"}],["$","meta","8",{"property":"og:image","content":"https://artis-ventures.com/og.jpg"}],["$","meta","9",{"property":"og:image:width","content":"1200"}],["$","meta","10",{"property":"og:image:height","content":"630"}],["$","meta","11",{"property":"og:image:alt","content":"Artis Ventures LLC-FZ — Gateway to Excellence"}],["$","meta","12",{"property":"og:type","content":"website"}],["$","meta","13",{"name":"twitter:card","content":"summary_large_image"}],["$","meta","14",{"name":"twitter:title","content":"Artis Ventures LLC-FZ — Gateway to Excellence"}],["$","meta","15",{"name":"twitter:description","content":"A 360° global business builder assisting financial institutions, fintechs and entrepreneurs establish, scale and expand across global financial markets — with a long-term public-listing ambition."}],["$","meta","16",{"name":"twitter:image","content":"https://artis-ventures.com/og.jpg"}],["$","link","17",{"rel":"icon","href":"/icon.svg?icon.2snreg2cjbza2.svg","sizes":"any","type":"image/svg+xml"}],["$","$L13","18",{}]]}]}],null]}],["$","meta",null,{"name":"next-size-adjust","content":""}]]}],"p":"$@14","v":null,"s":"$8"}},"a":"$@15","u":"$@16","b":"KL1ryzc6ghJrXH9mScOMP"}
+d:null
+16:true
+8:300
+8:C
+15:0
+6:"$undefined"
+14:"$undefined"
+e:"$undefined"

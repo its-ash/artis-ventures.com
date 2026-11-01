@@ -31,6 +31,7 @@ export const ui = {
   copied: 'Copied',
   primaryNav: 'Primary',
   footerNav: 'Footer',
+  moved: 'This page has moved. Continue →',
   newTab: 'opens in a new tab',
 } as const
 
