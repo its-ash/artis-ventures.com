@@ -1,0 +1,292 @@
+@import 'tailwindcss';
+
+:root {
+  --stone-50: #eeebe5;
+  --stone-200: #d9d4cb;
+  --graphite-950: #0c0e11;
+  --graphite-800: #1b1f24;
+  --teal-500: #33b7c2;
+  --teal-300: #7fd6db;
+  --teal-700: #1d6f76;
+  --mist-400: #9aa3ab;
+  --ink-900: #14171b;
+  --ink-600: #4a5058;
+
+  --bg: var(--graphite-950);
+  --fg: var(--stone-50);
+  --muted: var(--mist-400);
+  --line: var(--graphite-800);
+  --accent: var(--teal-500);
+
+  --pad: clamp(1.25rem, 4vw, 3.5rem);
+  --header-h: 4.5rem;
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@theme inline {
+  --color-stone-50: var(--stone-50);
+  --color-stone-200: var(--stone-200);
+  --color-graphite-950: var(--graphite-950);
+  --color-graphite-800: var(--graphite-800);
+  --color-teal-500: var(--teal-500);
+  --color-teal-300: var(--teal-300);
+  --color-teal-700: var(--teal-700);
+  --color-mist-400: var(--mist-400);
+  --color-ink-900: var(--ink-900);
+  --color-ink-600: var(--ink-600);
+  --color-bg: var(--bg);
+  --color-fg: var(--fg);
+  --color-muted: var(--muted);
+  --color-line: var(--line);
+  --color-accent: var(--accent);
+
+  --font-display: var(--font-inter-tight), ui-sans-serif, system-ui, sans-serif;
+  --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-jetbrains), ui-monospace, monospace;
+}
+
+[data-tone='dark'] {
+  --bg: var(--graphite-950);
+  --fg: var(--stone-50);
+  --muted: var(--mist-400);
+  --line: var(--graphite-800);
+  --accent: var(--teal-500);
+  --gridline: rgb(238 235 229 / 0.06);
+}
+
+[data-tone='light'] {
+  --bg: var(--stone-50);
+  --fg: var(--ink-900);
+  --muted: var(--ink-600);
+  --line: var(--stone-200);
+  --accent: var(--teal-700);
+  --gridline: transparent;
+}
+
+@layer base {
+  html {
+    -webkit-text-size-adjust: 100%;
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+    scroll-padding-top: var(--header-h);
+  }
+
+  body {
+    background: var(--graphite-950);
+    color: var(--stone-50);
+    font-family: var(--font-sans);
+    font-size: 17px;
+    line-height: 1.65;
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 3px;
+    border-radius: 2px;
+  }
+
+  /* Script-focused landmarks and sections (skip link, in-page nav) show no ring. */
+  [tabindex='-1']:focus {
+    outline: none;
+  }
+
+  ::selection {
+    background: var(--teal-500);
+    color: var(--graphite-950);
+  }
+
+  h1,
+  h2,
+  h3 {
+    text-wrap: balance;
+  }
+
+  p {
+    text-wrap: pretty;
+  }
+}
+
+@layer components {
+  .tone {
+    background-color: var(--bg);
+    color: var(--fg);
+  }
+
+  .shell {
+    width: 100%;
+    max-width: 1680px;
+    margin-inline: auto;
+    padding-inline: var(--pad);
+  }
+
+  .grid-12 {
+    display: grid;
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+    column-gap: clamp(1rem, 2vw, 2rem);
+  }
+
+  .gridlines {
+    position: relative;
+    isolation: isolate;
+  }
+
+  .gridlines::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+    --col: calc((min(100vw, 1680px) - 2 * var(--pad)) / 12);
+    background-image: linear-gradient(to right, var(--gridline) 1px, transparent 1px);
+    background-size: var(--col) 100%;
+    background-position: max(var(--pad), calc((100vw - 1680px) / 2 + var(--pad))) 0;
+    mask-image: linear-gradient(to bottom, transparent, #000 12%, #000 88%, transparent);
+  }
+
+  .label {
+    font-family: var(--font-mono);
+    font-size: 11.5px;
+    line-height: 1.4;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    font-weight: 400;
+  }
+
+  .display {
+    font-family: var(--font-display);
+    font-weight: 500;
+    letter-spacing: -0.04em;
+    line-height: 0.95;
+  }
+
+  .h-hero {
+    font-size: clamp(3.25rem, 10vw, 11rem);
+    line-height: 0.9;
+  }
+
+  .h-xl {
+    font-size: clamp(2.5rem, 6.4vw, 7rem);
+  }
+
+  .h-lg {
+    font-size: clamp(2.1rem, 4.6vw, 4.75rem);
+    line-height: 1;
+  }
+
+  .h-md {
+    font-size: clamp(1.5rem, 2.4vw, 2.25rem);
+    line-height: 1.1;
+    letter-spacing: -0.03em;
+  }
+
+  .prose-w {
+    max-width: 56ch;
+  }
+
+  .muted {
+    color: var(--muted);
+  }
+
+  .hair {
+    border-color: var(--line);
+  }
+
+  .btn-outline {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.6em;
+    min-height: 2.75rem;
+    padding: 0 1.15rem;
+    border: 1px solid var(--accent);
+    border-radius: 999px;
+    color: var(--fg);
+    transition:
+      background-color 0.3s var(--ease-out),
+      color 0.3s var(--ease-out);
+  }
+
+  .btn-outline:hover {
+    background: var(--accent);
+    color: var(--bg);
+  }
+
+  .link-u {
+    background: linear-gradient(currentColor, currentColor) 0 100% / 100% 1px no-repeat;
+    transition: background-size 0.4s var(--ease-out);
+  }
+
+  .link-u:hover {
+    background-size: 0% 1px;
+    background-position: 100% 100%;
+  }
+
+  .stone-tex {
+    background-image: url('/textures/stone.webp');
+    background-size: 1280px auto;
+    background-blend-mode: multiply;
+  }
+
+  /* SplitText line masks: room for descenders without shifting layout */
+  .ln-mask {
+    padding-block: 0.06em 0.14em;
+    margin-block: -0.06em -0.14em;
+  }
+
+  .stone-surface {
+    background-color: var(--stone-50);
+    background-image: url('/textures/stone.webp');
+    background-size: 1280px auto;
+    background-blend-mode: multiply;
+  }
+
+  /* With WebGL, sections let the fixed stone/video/canvas layers show through */
+  .has-gl main .tone {
+    background-color: transparent;
+  }
+
+  .has-gl main .stone-tex {
+    background-image: none;
+  }
+
+  .has-gl [data-fallback-media] {
+    display: none;
+  }
+
+  /* If scripts fail after the loader is painted, it still fades out. */
+  .loader-failsafe {
+    animation: loader-failsafe 0.4s ease 14s forwards;
+  }
+
+  .skip {
+    position: fixed;
+    left: 1rem;
+    top: 1rem;
+    z-index: 100;
+    padding: 0.75rem 1rem;
+    background: var(--teal-500);
+    color: var(--graphite-950);
+    transform: translateY(-200%);
+  }
+
+  .skip:focus-visible {
+    transform: none;
+  }
+}
+
+@keyframes loader-failsafe {
+  to {
+    opacity: 0;
+    visibility: hidden;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
