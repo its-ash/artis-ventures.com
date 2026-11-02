@@ -5,6 +5,7 @@ import { usePathname } from 'next/navigation'
 import { Logo } from '@/components/brand/Logo'
 import { useActiveSection } from '@/components/useActiveSection'
 import { nav, sections, ui } from '@/content/site'
+import { asset } from '@/lib/base'
 
 const HIDE_AFTER = 120
 const pad = (n: number) => String(n).padStart(2, '0')
@@ -17,7 +18,7 @@ export function Header() {
   const [open, setOpen] = useState(false)
   const btn = useRef<HTMLButtonElement>(null)
   const panel = useRef<HTMLDivElement>(null)
-  const href = (h: string) => (home ? h : `/${h}`)
+  const href = (h: string) => (home ? h : asset(`/${h}`))
 
   useEffect(() => {
     let last = window.scrollY
@@ -64,7 +65,7 @@ export function Header() {
         onFocusCapture={() => setHidden(false)}
       >
         <div className="shell flex h-(--header-h) items-center justify-between gap-6">
-          <a href={home ? '#hero' : '/'} className="block w-28 shrink-0 text-accent md:w-32">
+          <a href={home ? '#hero' : asset('/')} className="block w-28 shrink-0 text-accent md:w-32">
             <Logo className="h-auto w-full" />
           </a>
           <nav aria-label={ui.primaryNav} className="hidden lg:block">

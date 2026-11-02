@@ -239,7 +239,7 @@
   }
 
   .stone-tex {
-    background-image: url('/textures/stone.webp');
+    background-image: url('../public/textures/stone.webp');
     background-size: 1280px auto;
     background-blend-mode: multiply;
   }
@@ -252,7 +252,7 @@
 
   .stone-surface {
     background-color: var(--stone-50);
-    background-image: url('/textures/stone.webp');
+    background-image: url('../public/textures/stone.webp');
     background-size: 1280px auto;
     background-blend-mode: multiply;
   }

@@ -6,6 +6,7 @@ import { useFrame, useThree } from '@react-three/fiber'
 import { MeshPortalMaterial, useVideoTexture } from '@react-three/drei'
 import { damp, damp3, dampE } from 'maath/easing'
 import { buildArch, GLOW, makeGlass } from '@/components/scene/geometry'
+import { asset } from '@/lib/base'
 import { FRONT_Z, OPENING } from '@/scene/aShape'
 import { DAMP, keyframes as K } from '@/scene/keyframes'
 import { frameStep, targets, useScene, type VideoName } from '@/scene/store'
@@ -20,7 +21,7 @@ const makeMaterials = (quality: number) => ({
 })
 
 function PortalVideo({ src }: { src: VideoName }) {
-  const tex = useVideoTexture(`/video/${src}.mp4`, { start: true, muted: true, loop: true, playsInline: true })
+  const tex = useVideoTexture(asset(`/video/${src}.mp4`), { start: true, muted: true, loop: true, playsInline: true })
   const plane = useRef<THREE.Mesh>(null)
   const camera = useThree((s) => s.camera) as THREE.PerspectiveCamera
   const size = useThree((s) => s.size)

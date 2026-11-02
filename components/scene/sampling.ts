@@ -1,4 +1,5 @@
 import * as THREE from 'three'
+import { asset } from '@/lib/base'
 import { latLonToVec } from '@/scene/geo'
 
 // Unit cube (capabilities blocks, path nodes): transparent faces, border on the 12 edges.
@@ -51,7 +52,7 @@ export const textCells = async (text: string, cell: number, height = 2.6) => {
 // Dot globe: a Fibonacci lattice of `n` points, flagged by an equirectangular mask (white = land).
 // Every land point stays; one sea point in three stays as a dim ocean. Points geometry with
 // aLand (1 land · 0 sea) and aRnd.
-export const landDots = async (radius: number, n: number, src = '/textures/landmask.png') => {
+export const landDots = async (radius: number, n: number, src = asset('/textures/landmask.png')) => {
   const img = new Image()
   img.src = src
   await img.decode()

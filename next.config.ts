@@ -4,6 +4,7 @@ import { legacy } from './lib/legacy'
 // STATIC_EXPORT=1 builds a static site for GitHub Pages (`make build` → docs/).
 // Static hosting cannot send redirects or headers, so they apply only to the server build.
 const exporting = process.env.STATIC_EXPORT === '1'
+const BASE = exporting ? '/artis-ventures.com' : ''
 
 const server: NextConfig = {
   async redirects() {
@@ -31,7 +32,8 @@ const server: NextConfig = {
 const config: NextConfig = {
   reactStrictMode: true,
   poweredByHeader: false,
-  basePath: exporting ? '/artis-ventures.com' : '',
+  basePath: BASE,
+  env: { NEXT_PUBLIC_BASE_PATH: BASE },
   ...(exporting ? { output: 'export', trailingSlash: true, images: { unoptimized: true } } : server),
 }
 

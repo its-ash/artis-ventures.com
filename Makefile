@@ -1,16 +1,13 @@
 .PHONY: run build deploy
 
-DOMAIN := artis-ventures.com
-
 run:
 	npm run dev
 
-# Static export for GitHub Pages: out/ → docs/ with the custom domain and no Jekyll.
+# Static export for GitHub Pages: out/ → docs/ under the /artis-ventures.com project path, no Jekyll.
 build:
 	npm run export
 	rm -rf docs
 	cp -R out docs
-	echo "$(DOMAIN)" > docs/CNAME
 	touch docs/.nojekyll
 
 deploy: build

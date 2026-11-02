@@ -1,3 +1,5 @@
+import { asset } from '@/lib/base'
+
 type Props = {
   name: 'hero_city' | 'contact_city' | 'approach_caustics'
   className?: string
@@ -8,7 +10,7 @@ export function BgVideo({ name, className = '', eager = false }: Props) {
   return (
     <video
       className={`h-full w-full object-cover ${className}`}
-      poster={`/posters/${name}.webp`}
+      poster={asset(`/posters/${name}.webp`)}
       autoPlay
       muted
       loop
@@ -19,7 +21,7 @@ export function BgVideo({ name, className = '', eager = false }: Props) {
       disablePictureInPicture
       data-video={name}
     >
-      <source src={`/video/${name}.mp4`} type="video/mp4" />
+      <source src={asset(`/video/${name}.mp4`)} type="video/mp4" />
     </video>
   )
 }

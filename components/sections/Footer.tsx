@@ -1,6 +1,7 @@
 import { Logo } from '@/components/brand/Logo'
 import Link from 'next/link'
 import { footer, nav, offices, ui } from '@/content/site'
+import { asset } from '@/lib/base'
 
 const summary = offices.items.filter((o) => o.id !== 'london')
 
@@ -19,13 +20,13 @@ export function Footer() {
             <ul className="space-y-3">
               {nav.map((n) => (
                 <li key={n.href}>
-                  <a href={`/${n.href}`} className="label hover:text-accent">
+                  <a href={asset(`/${n.href}`)} className="label hover:text-accent">
                     {n.label}
                   </a>
                 </li>
               ))}
               <li>
-                <a href={footer.opportunities.href} className="label hover:text-accent">
+                <a href={asset(footer.opportunities.href)} className="label hover:text-accent">
                   {footer.opportunities.label}
                 </a>
               </li>
@@ -48,7 +49,7 @@ export function Footer() {
         </div>
         <div className="hair mt-20 flex flex-wrap items-center justify-between gap-4 border-t pt-6">
           <p className="label text-muted">{footer.copyright}</p>
-          <a href={footer.privacy.href} className="label link-u text-muted">
+          <a href={asset(footer.privacy.href)} className="label link-u text-muted">
             {footer.privacy.label}
           </a>
         </div>
