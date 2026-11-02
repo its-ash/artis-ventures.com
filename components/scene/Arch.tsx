@@ -102,6 +102,12 @@ export function Arch() {
       body.current.visible = fill > 0.002
     }
     if (portalMesh.current) portalMesh.current.visible = fill > 0.002
+    // No video decoding while the arch is off-stage.
+    const vid = useScene.getState().portalEl
+    if (vid && useScene.getState().motion) {
+      if (fill > 0.002 && vid.paused) void vid.play().catch(() => {})
+      else if (fill <= 0.002 && !vid.paused) vid.pause()
+    }
 
     // Wire draws with load progress (0–1), then fades to a faint rest as the glass fills in.
     const ln = line.current

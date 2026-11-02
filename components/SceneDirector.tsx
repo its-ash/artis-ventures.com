@@ -4,13 +4,14 @@ import { useEffect } from 'react'
 import gsap from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import { SplitText } from 'gsap/SplitText'
+import { ScrambleTextPlugin } from 'gsap/ScrambleTextPlugin'
 import { useGSAP } from '@gsap/react'
 import type Lenis from 'lenis'
 import { keyframes as K } from '@/scene/keyframes'
-import { useScene } from '@/scene/store'
+import { flux, targets, useScene } from '@/scene/store'
 import { layout } from '@/scene/view'
 
-gsap.registerPlugin(ScrollTrigger, SplitText, useGSAP)
+gsap.registerPlugin(ScrollTrigger, SplitText, ScrambleTextPlugin, useGSAP)
 // Mobile URL-bar show/hide must not re-measure every trigger.
 ScrollTrigger.config({ ignoreMobileResize: true })
 
@@ -21,8 +22,16 @@ const pad = (n: number) => String(n).padStart(2, '0')
 // Masked text travel (% of the line/char box). Lines are set at line-height 0.9, so glyph
 // descenders and ascenders overhang the box; 110% left the "y" tail visible in its mask.
 const MASK = 150
+// House motion: long, settling exits of the mask. One vocabulary for every reveal.
+const RISE = { duration: 1.2, ease: 'expo.out' } as const
+const FADE = { duration: 0.45, ease: 'power1.out' } as const
 // Non-pinned triggers refresh after pins so their positions include pin spacing.
 const LATE = { refreshPriority: -1 } as const
+
+// Plays a paused timeline once its trigger enters. A callback trigger has its positions at once; a `once`
+// trigger owned by a timeline waits a tick, so another trigger's refresh can fire and kill it mid-loop.
+const playOnce = (trigger: Element, start: string, tl: gsap.core.Timeline) =>
+  ScrollTrigger.create({ trigger, start, once: true, ...LATE, onEnter: () => void tl.play() })
 
 let lenis: Lenis | null = null
 
@@ -33,7 +42,7 @@ function useLenis() {
     let off = false
     let stop = () => {}
     void import('lenis').then(({ default: L }) => {
-      if (!off) stop = startLenis(new L({ autoRaf: false, lerp: 0.1 }))
+      if (!off) stop = startLenis(new L({ autoRaf: false, lerp: 0.09, wheelMultiplier: 0.9 }))
     })
     return () => {
       off = true
@@ -96,28 +105,37 @@ const whenEntered = (fn: () => void) => {
 function textReveals(motion: boolean) {
   for (const el of qa('[data-split]')) {
     if (el.id === 'hero-title') continue
-    const st = { trigger: el, start: 'top 85%', once: true, ...LATE }
     if (!motion) {
-      gsap.from(el, { autoAlpha: 0, duration: 0.8, scrollTrigger: st })
+      gsap.from(el, { autoAlpha: 0, duration: 0.8, scrollTrigger: { trigger: el, start: 'top 88%', once: true, ...LATE } })
       continue
     }
+    let st: ScrollTrigger | undefined
     SplitText.create(el.firstElementChild!, {
       type: 'lines',
       mask: 'lines',
       linesClass: 'ln',
       aria: 'none',
       autoSplit: true,
-      onSplit: (self) =>
-        gsap.from(self.lines, { yPercent: MASK, duration: 0.9, ease: 'power4.out', stagger: 0.08, scrollTrigger: st }),
+      // Lines rise out of the mask with a short fade, so the top edge never reads as a hard cut.
+      // A re-split (resize, fonts) replaces both the timeline and its trigger.
+      onSplit: (self) => {
+        st?.kill()
+        const tl = gsap
+          .timeline({ paused: true })
+          .from(self.lines, { yPercent: MASK, ...RISE, stagger: 0.09 }, 0)
+          .from(self.lines, { opacity: 0, ...FADE, stagger: 0.09 }, 0)
+        st = playOnce(el, 'top 88%', tl)
+        return tl
+      },
     })
   }
   for (const el of qa('[data-reveal]'))
     gsap.from(el, {
       autoAlpha: 0,
-      y: motion ? 24 : 0,
-      duration: 0.9,
+      y: motion ? 28 : 0,
+      duration: 1.1,
       ease: 'power3.out',
-      scrollTrigger: { trigger: el, start: 'top 80%', once: true, ...LATE },
+      scrollTrigger: { trigger: el, start: 'top 84%', once: true, ...LATE },
     })
 }
 
@@ -138,17 +156,22 @@ function heroDom() {
   const title = SplitText.create(h1, { type: 'chars,lines', mask: 'lines', linesClass: 'ln', aria: 'none' })
   const sub = SplitText.create(subs, { type: 'lines', mask: 'lines', linesClass: 'ln', aria: 'none' })
 
-  gsap.set(title.chars, { yPercent: MASK })
-  whenEntered(() => gsap.to(title.chars, { yPercent: 0, duration: 0.9, ease: 'power4.out', stagger: 0.025 }))
+  gsap.set(title.chars, { yPercent: MASK, opacity: 0 })
+  whenEntered(() =>
+    gsap
+      .timeline({ delay: 0.15 })
+      .to(title.chars, { yPercent: 0, duration: 1.3, ease: 'expo.out', stagger: 0.022 }, 0)
+      .to(title.chars, { opacity: 1, duration: 0.5, ease: 'power1.out', stagger: 0.022 }, 0),
+  )
 
   const tl = gsap
     .timeline({
       defaults: { ease: 'none' },
       scrollTrigger: { trigger: '#hero', start: 'top top', end: `+=${layout().heroPin * 100}%`, pin: true, scrub: true, anticipatePin: 1 },
     })
-    .fromTo(title.lines, { yPercent: 0 }, { yPercent: -MASK, stagger: 0.02, duration: span(H.headlineOut) * 0.7, ease: 'power2.in', immediateRender: false }, H.headlineOut[0])
+    .fromTo(title.lines, { yPercent: 0 }, { yPercent: -MASK, stagger: 0.025, duration: span(H.headlineOut) * 0.75, ease: 'power2.inOut', immediateRender: false }, H.headlineOut[0])
     .fromTo(label, { autoAlpha: 1 }, { autoAlpha: 0, duration: span(H.headlineOut) * 0.5, immediateRender: false }, H.headlineOut[0])
-    .fromTo(sub.lines, { yPercent: MASK }, { yPercent: 0, stagger: 0.02, duration: span(H.subIn) * 0.7, ease: 'power3.out' }, H.subIn[0])
+    .fromTo(sub.lines, { yPercent: MASK }, { yPercent: 0, stagger: 0.03, duration: span(H.subIn) * 0.8, ease: 'power2.out' }, H.subIn[0])
     .call(syncStageVideo, [], H.handoff[0] - 0.01)
     .set({}, {}, 1)
   return tl.scrollTrigger ?? null
@@ -206,11 +229,12 @@ function glanceDom() {
   })
   for (let k = 1; k < n; k++) {
     const p = G.morphs[k]! + G.morphLen / 2
-    tl.fromTo(items[k - 1]!, { opacity: 1, y: 0 }, { opacity: 0, y: -24, duration: 0.05 }, p - 0.05).fromTo(
+    // Outgoing label drifts up while the next drifts in: an overlapping cross-fade, not a cut.
+    tl.fromTo(items[k - 1]!, { opacity: 1, y: 0 }, { opacity: 0, y: -40, duration: 0.08, ease: 'power1.in' }, p - 0.06).fromTo(
       items[k]!,
-      { opacity: 0, y: 24 },
-      { opacity: 1, y: 0, duration: 0.05 },
-      p,
+      { opacity: 0, y: 40 },
+      { opacity: 1, y: 0, duration: 0.08, ease: 'power1.out' },
+      p - 0.02,
     )
   }
   tl.set({}, {}, 1)
@@ -232,12 +256,14 @@ function trackDom() {
   const tl = gsap
     .timeline({
       defaults: { ease: 'none' },
+      // The cubes read this eased progress, so they never run ahead of the cards.
+      onUpdate: () => void (targets().blocks.active = tl.progress() * (n - 1)),
       scrollTrigger: {
         trigger: track,
         start: K.capabilities.trackStart,
         end: () => `+=${Math.max(dist() * 2, innerHeight * 1.5)}`,
         pin: true,
-        scrub: 1,
+        scrub: 0.8,
         invalidateOnRefresh: true,
         onUpdate: (st) => count && (count.textContent = `[${pad(Math.round(st.progress * (n - 1)) + 1)}/${pad(n)}]`),
       },
@@ -261,11 +287,14 @@ function menuDom() {
   let x = 0
   let dir = 1
   let boost = 0
+  // Width is read on refresh only: no layout reads inside the ticker.
+  let half = track.scrollWidth / 2
   const st = ScrollTrigger.create({
     trigger: track,
     start: 'top bottom',
     end: 'bottom top',
     ...LATE,
+    onRefresh: () => void (half = track.scrollWidth / 2),
     onUpdate: (s) => {
       const v = s.getVelocity()
       if (Math.abs(v) > 5) dir = v > 0 ? 1 : -1
@@ -277,7 +306,7 @@ function menuDom() {
   const tick = (_t: number, dt: number) => {
     if (!st.isActive || boost < 0.01) return
     boost *= 0.94
-    x = gsap.utils.wrap(-track.scrollWidth / 2, 0, x - dir * boost * dt * 0.06)
+    x = gsap.utils.wrap(-half, 0, x - dir * boost * dt * 0.06)
     setX(x)
   }
   gsap.ticker.add(tick)
@@ -300,17 +329,24 @@ function approachDom(desktop: boolean) {
   })
   for (let k = 1; k < n; k++) {
     const p = (k - 0.5) / (n - 1)
-    tl.fromTo(steps[k - 1]!, on, { ...off, duration: 0.08 }, p - 0.04).fromTo(steps[k]!, off, { ...on, duration: 0.08 }, p - 0.04)
+    tl.fromTo(steps[k - 1]!, on, { ...off, duration: 0.1, ease: 'power1.inOut' }, p - 0.05).fromTo(
+      steps[k]!,
+      off,
+      { ...on, duration: 0.1, ease: 'power1.inOut' },
+      p - 0.05,
+    )
   }
   tl.set({}, {}, 1)
   const st = tl.scrollTrigger ?? null
   if (!desktop || !st) return { pin: st, off: () => {} }
+  // Gentle settle: only when the user stops near a step, never a yank from mid-way.
   const snap = () => {
     if (!st.isActive) return
     const goal = Math.round(st.progress * (n - 1)) / (n - 1)
-    if (Math.abs(goal - st.progress) < 0.01) return
+    const gap = Math.abs(goal - st.progress)
+    if (gap < 0.005 || gap > 0.35 / (n - 1)) return
     const y = st.start + (st.end - st.start) * goal
-    if (lenis) lenis.scrollTo(y, { duration: 0.7 })
+    if (lenis) lenis.scrollTo(y, { duration: 1.1, easing: (t: number) => 1 - Math.pow(1 - t, 3) })
     else window.scrollTo({ top: y, behavior: 'smooth' })
   }
   ScrollTrigger.addEventListener('scrollEnd', snap)
@@ -344,9 +380,10 @@ function reachDom() {
 function leadershipDom() {
   for (const box of qa('[data-leader-photo]')) {
     const inner = box.firstElementChild
-    const tl = gsap.timeline({ scrollTrigger: { trigger: box, start: 'top 80%', once: true, ...LATE } })
+    const tl = gsap.timeline({ paused: true })
     tl.fromTo(box, { clipPath: 'inset(100% 0% 0% 0%)' }, { clipPath: 'inset(0% 0% 0% 0%)', duration: 1.2, ease: 'power4.inOut' })
     if (inner) tl.fromTo(inner, { scale: 1.12 }, { scale: 1, duration: 1.6, ease: 'power3.out' }, 0)
+    playOnce(box, 'top 80%', tl)
   }
   for (const h of qa('[data-leader-name]'))
     SplitText.create(h, {
@@ -365,13 +402,88 @@ function leadershipDom() {
     })
 }
 
-// Footer: the huge wordmark slides up from behind the fold.
+// Scroll velocity → `flux`: the scene warps with the scroll speed and settles when it stops.
+function fluxDom() {
+  let raw = 0
+  const st = ScrollTrigger.create({
+    start: 0,
+    end: 'max',
+    onUpdate: (s) => void (raw = gsap.utils.clamp(-1, 1, s.getVelocity() / 3200)),
+  })
+  const tick = (_t: number, dt: number) => {
+    raw *= Math.pow(0.9, dt / 16.7)
+    const k = 1 - Math.pow(0.88, dt / 16.7)
+    flux.v += (raw - flux.v) * k
+    flux.a = Math.abs(flux.v)
+  }
+  gsap.ticker.add(tick)
+  return () => {
+    gsap.ticker.remove(tick)
+    st.kill()
+    flux.v = flux.a = 0
+  }
+}
+
+// Section labels decode from glyph noise as they enter.
+const GLYPHS = '01<>/[]+=#'
+function labelDom() {
+  for (const el of qa('[data-scramble]')) {
+    const text = el.textContent ?? ''
+    if (!text.trim()) continue
+    gsap.to(el, {
+      duration: Math.min(1.4, 0.5 + text.length * 0.03),
+      ease: 'none',
+      scrambleText: { text, chars: GLYPHS, speed: 0.5, revealDelay: 0.15 },
+      scrollTrigger: { trigger: el, start: 'top 90%', once: true, ...LATE },
+    })
+  }
+}
+
+// Footer wordmark: letters rise one after another and their fill sweeps up with the scroll;
+// while the footer is in view they float in a slow wave and a light band crosses the word.
+// On fine pointers a hovered letter stretches up and its fill fades to show the teal outline.
 function footerDom() {
+  const chars = qa('[data-footer-char]')
+  const st = { trigger: 'footer', start: 'top bottom', end: 'bottom bottom', scrub: true, ...LATE }
+  const inView = { trigger: 'footer', start: 'top 60%', toggleActions: 'play pause resume pause', ...LATE }
+  gsap
+    .timeline({ defaults: { ease: 'none' }, scrollTrigger: st })
+    .fromTo(chars, { yPercent: 70 }, { yPercent: 0, stagger: 0.08, duration: 0.6 }, 0)
+    .fromTo('[data-footer-fill]', { clipPath: 'inset(100% 0% 0% 0%)' }, { clipPath: 'inset(0% 0% 0% 0%)', stagger: 0.08, duration: 0.6 }, 0.25)
+  // `y` composes with the scrubbed `yPercent`, so the wave rides on top of the rise.
+  gsap.to(chars, { y: -14, duration: 2.2, ease: 'sine.inOut', stagger: { each: 0.18, repeat: -1, yoyo: true }, scrollTrigger: inView })
+  const off: (() => void)[] = []
+  if (matchMedia('(hover: hover) and (pointer: fine)').matches)
+    for (const ch of chars) {
+      const fill = ch.querySelector('[data-footer-fill]')
+      const over = () => {
+        gsap.to(ch, { scaleY: 1.08, transformOrigin: '50% 100%', duration: 0.45, ease: 'power3.out', overwrite: 'auto' })
+        gsap.to(fill, { opacity: 0.15, duration: 0.3, ease: 'power2.out', overwrite: 'auto' })
+      }
+      const out = () => {
+        gsap.to(ch, { scaleY: 1, duration: 0.35, ease: 'power3.out', overwrite: 'auto' })
+        gsap.to(fill, { opacity: 1, duration: 0.25, ease: 'power2.out', overwrite: 'auto' })
+      }
+      ch.addEventListener('pointerenter', over)
+      ch.addEventListener('pointerleave', out)
+      off.push(() => {
+        ch.removeEventListener('pointerenter', over)
+        ch.removeEventListener('pointerleave', out)
+      })
+    }
   gsap.fromTo(
-    '[data-footer-word]',
-    { yPercent: 60 },
-    { yPercent: 0, ease: 'none', scrollTrigger: { trigger: 'footer', start: 'top bottom', end: 'bottom bottom', scrub: true, ...LATE } },
+    '[data-footer-glint]',
+    { clipPath: 'inset(0% 100% 0% -12%)' },
+    {
+      clipPath: 'inset(0% -12% 0% 100%)',
+      duration: 2.6,
+      ease: 'power1.inOut',
+      repeat: -1,
+      repeatDelay: 2.4,
+      scrollTrigger: inView,
+    },
   )
+  return () => off.forEach((fn) => fn())
 }
 
 export function SceneDirector() {
@@ -404,11 +516,15 @@ export function SceneDirector() {
           const approach = approachDom(desktop)
           const reach = gl ? reachDom() : null
           leadershipDom()
-          footerDom()
+          const footerOff = footerDom()
+          labelDom()
+          const fluxOff = gl ? fluxDom() : () => {}
           const trackOff =
             scenery && hero ? scenery.sceneTrack(scenery.buildScene({ hero, glance, track, approach: approach.pin, reach })) : () => {}
           return () => {
             menuOff()
+            footerOff()
+            fluxOff()
             approach.off()
             trackOff()
           }

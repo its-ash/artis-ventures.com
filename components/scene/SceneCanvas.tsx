@@ -1,19 +1,22 @@
 'use client'
 
-import { Suspense, useEffect, useRef } from 'react'
-import { Canvas, useThree } from '@react-three/fiber'
+import { Suspense, useEffect, useMemo, useRef } from 'react'
+import * as THREE from 'three'
+import { Canvas, useFrame, useThree } from '@react-three/fiber'
 import { Environment, PerformanceMonitor, useProgress } from '@react-three/drei'
-import { Bloom, EffectComposer, Noise, Vignette } from '@react-three/postprocessing'
+import { Bloom, ChromaticAberration, EffectComposer, Noise, Scanline, Vignette } from '@react-three/postprocessing'
+import type { ScanlineEffect } from 'postprocessing'
 import gsap from 'gsap'
 import { ApproachPath } from '@/components/scene/ApproachPath'
 import { Arch } from '@/components/scene/Arch'
 import { Blocks } from '@/components/scene/Blocks'
 import { CameraRig } from '@/components/scene/CameraRig'
 import { DotGlobe } from '@/components/scene/DotGlobe'
-import { ParticleMorph } from '@/components/scene/ParticleMorph'
+import { NumeralMatrix } from '@/components/scene/NumeralMatrix'
 import { Shards } from '@/components/scene/Shards'
+import { Starfield } from '@/components/scene/Starfield'
 import { keyframes as K } from '@/scene/keyframes'
-import { targets, useScene, type Quality } from '@/scene/store'
+import { flux, targets, useScene, type Quality } from '@/scene/store'
 
 const HIDDEN = 0.001
 
@@ -50,10 +53,22 @@ function FrameGate() {
   return null
 }
 
+// Lens split and holographic scanlines grow with scroll speed (the uniform holds this vector by reference).
+const SPLIT = 0.0022
+const SCAN = { density: 1.4, rest: 0.035, boost: 0.16 }
+
 function Effects() {
+  const offset = useMemo(() => new THREE.Vector2(), [])
+  const scan = useRef<ScanlineEffect>(null)
+  useFrame(() => {
+    offset.set(flux.v * SPLIT, flux.a * SPLIT * 0.4)
+    if (scan.current) scan.current.blendMode.opacity.value = SCAN.rest + flux.a * SCAN.boost
+  })
   return (
     <EffectComposer multisampling={0} enableNormalPass={false}>
       <Bloom mipmapBlur luminanceThreshold={0.85} luminanceSmoothing={0.2} intensity={0.55} />
+      <ChromaticAberration offset={offset} radialModulation modulationOffset={0.25} />
+      <Scanline ref={scan} density={SCAN.density} opacity={SCAN.rest} />
       <Noise premultiply opacity={0.03} />
       <Vignette offset={0.3} darkness={0.55} />
     </EffectComposer>
@@ -62,6 +77,7 @@ function Effects() {
 
 export default function SceneCanvas() {
   const quality = useScene((s) => s.quality)
+  const mobile = useScene((s) => s.mobile)
   const wrap = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
@@ -83,25 +99,28 @@ export default function SceneCanvas() {
   return (
     <div ref={wrap} aria-hidden="true" className="pointer-events-none fixed inset-0 -z-10">
       <Canvas
-        dpr={quality >= 2 ? [1, 1.75] : quality === 1 ? [1, 1.5] : 1}
-        gl={{ alpha: true, antialias: quality >= 2, powerPreference: 'high-performance', stencil: false }}
+        dpr={mobile ? [1, quality >= 1 ? 1.25 : 1] : quality >= 2 ? [1, 1.5] : quality === 1 ? [1, 1.25] : 1}
+        gl={{ alpha: true, antialias: quality >= 2 && !mobile, powerPreference: 'high-performance', stencil: false, depth: true }}
+        // Glass transmission re-renders the scene each frame; low resolution is invisible behind blur.
+        onCreated={({ gl }) => void (gl.transmissionResolutionScale = mobile ? 0.35 : 0.5)}
         camera={{ position: [K.hero.idle.camera.x, K.hero.idle.camera.y, K.hero.idle.camera.z], fov: K.hero.idle.camera.fov, near: 0.05, far: 60 }}
       >
         <PerformanceMonitor flipflops={3} onDecline={() => step(-1)} onFallback={() => useScene.setState({ quality: 1 })} />
         <LoadBridge />
         <FrameGate />
         <CameraRig />
+        <Starfield />
         <Suspense fallback={null}>
           <Environment files="/hdri/city_512.hdr" environmentIntensity={0.9} />
           <AssetsReady />
         </Suspense>
         <Arch />
         <Shards />
-        <ParticleMorph />
+        <NumeralMatrix />
         <Blocks />
         <ApproachPath />
         <DotGlobe />
-        {quality >= 3 && <Effects />}
+        {quality >= 3 && !mobile && <Effects />}
       </Canvas>
     </div>
   )

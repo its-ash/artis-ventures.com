@@ -127,6 +127,7 @@ export function stillScene() {
         const stop = K.reach.stops[i]
         if (!st.isActive || !stop) return
         Object.assign(t.particles, stopRotation(stop))
+        t.globe.stop = i
       },
     }),
   )

@@ -6,6 +6,8 @@ import { FRONT_Z, OPENING } from './aShape'
 // -1 left/bottom edge, 0 centre, 1 right/top edge.
 
 export const DAMP = 0.15
+// The camera is heavier than the objects: it glides a beat behind the scroll.
+export const CAMERA_DAMP = 0.24
 
 const office = (id: string) => offices.items.find((o) => o.id === id)!
 
@@ -13,7 +15,8 @@ export const keyframes = {
   // Camera for every section after the hero (z = 0 plane is the layout plane).
   stage: { camera: { x: 0, y: 0, z: 9, tx: 0, ty: 0, tz: 0, fov: 35 } },
 
-  particles: { count: 8000, mobile: 3000, size: 26, noise: 1 },
+  // Numerals: glyph cell size in raster px (desktop / mobile). Globe: lattice points sampled for the dots.
+  matrix: { cell: 9, mobileCell: 12, dots: 30000, mobileDots: 14000 },
 
   preload: {
     minTime: 1.2, // s, counter never finishes faster than this
@@ -89,6 +92,9 @@ export const keyframes = {
     pin: 3.5, // 5 stops × 70vh
     globe: { x: 0.45, y: -0.02, radius: 1.7, scale: 1 }, // x, y in (vx, vy)
     tilt: -0.18, // rad, stop sits a little below the globe centre
+    // Tint per stop, in `stops` order, from the site palette (teal, mist, stone):
+    // CMA (UAE) · FCA (UK) · FSC (Mauritius) · Dubai · Hong Kong
+    neon: ['#7fd6db', '#33b7c2', '#9aa3ab', '#eeebe5', '#5fc6cd'],
     hub: { lat: office('dubai').lat, lon: office('dubai').lon },
     stops: [
       ...reach.regulators.map((r) => ({ lat: r.lat, lon: r.lon })),

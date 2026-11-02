@@ -46,7 +46,8 @@ export function buildScene(p: Pins): Segment[] {
   const mid = vIn + span(H.handoff) * 0.3
   add(p.hero, (tl, s, L) =>
     tl
-      .fromTo(t.camera, { ...H.idle.camera }, { ...H.flight.camera, duration: L * span(H.flight.at), ease: 'power2.in' }, at(s, L, H.flight.at[0]))
+      // Ease in and out: the dolly settles in the opening as the video comes up, instead of lurching through.
+      .fromTo(t.camera, { ...H.idle.camera }, { ...H.flight.camera, duration: L * span(H.flight.at), ease: 'power2.inOut' }, at(s, L, H.flight.at[0]))
       .fromTo(t.object, { idle: 1 }, { idle: 0, duration: L * 0.4 }, s)
       // Video comes up under the still-opaque portal, then the canvas fades: no luminance dip.
       .fromTo(t.video, { opacity: 0, blur: 0, scale: 1 }, { opacity: 1, duration: L * (mid - vIn) }, at(s, L, vIn))
@@ -157,9 +158,12 @@ export function buildScene(p: Pins): Segment[] {
       .fromTo(t.blocks, { opacity: 0 }, { opacity: 1, duration: L * 0.2 }, at(s, L, 0.65)),
   )
 
-  // 7 · Track: the block for the centred card turns to show its number.
-  const trackR = p.track ?? range({ trigger: '[data-track]', start: 'top 60%', end: 'bottom 40%' })
-  add(trackR, (tl, s, L) => tl.fromTo(t.blocks, { active: 0 }, { active: capabilities.cards.length - 1, duration: L }, s))
+  // 7 · Track: on desktop the scrubbed card timeline drives `blocks.active` itself (SceneDirector),
+  // so the cubes stay in step with the cards. Mobile (stacked cards) follows scroll here.
+  if (!p.track)
+    add(range({ trigger: '[data-track]', start: 'top 60%', end: 'bottom 40%' }), (tl, s, L) =>
+      tl.fromTo(t.blocks, { active: 0 }, { active: capabilities.cards.length - 1, duration: L }, s),
+    )
 
   // 8 · Full menu: blocks recede behind the text.
   const M = K.menu.recede
@@ -200,7 +204,8 @@ export function buildScene(p: Pins): Segment[] {
       .fromTo(t.blocks, { collapse: 0, opacity: 0.35 }, { collapse: 1, opacity: 0, duration: L * 0.55, ease: 'power2.in' }, s)
       .fromTo(t.particles, { opacity: 0 }, { opacity: 1, duration: L * 0.3 }, at(s, L, 0.25))
       .fromTo(t.particles, { morph: 5 }, { morph: 6, duration: L * 0.65, ease: 'power2.out' }, at(s, L, 0.25))
-      .fromTo(t.globe, { opacity: 0, pins: 0, arcs: 0 }, { opacity: 1, duration: L * 0.4 }, at(s, L, 0.55)),
+      .fromTo(t.globe, { opacity: 0, pins: 0, arcs: 0 }, { opacity: 1, duration: L * 0.4 }, at(s, L, 0.55))
+      .set(t.globe, { spin: 1, stop: 0 }, s),
   )
 
   // 13 · Reach (pinned): UAE → UK → Mauritius → Dubai → Hong Kong; pins rise, arcs draw from Dubai.
@@ -209,12 +214,15 @@ export function buildScene(p: Pins): Segment[] {
       const n = stops.length
       let prev = rot0
       let arcs = 0
+      // The free spin rolls forward into the first stop, then the stops take over.
+      tl.fromTo(t.globe, { spin: 1 }, { spin: 0, duration: L * 0.05 }, s)
       tl.fromTo(t.globe, { pins: 0 }, { pins: 1, duration: L * 0.06 }, s)
       if (!isHub(stops[0]!)) tl.fromTo(t.globe, { arcs: 0 }, { arcs: ++arcs, duration: L * 0.1 }, s)
       for (let k = 1; k < n; k++) {
         const r = stopRotation(stops[k]!)
         const next = { rx: r.rx, ry: nearAngle(prev.ry, r.ry) }
         tl.fromTo(t.particles, { rx: prev.rx, ry: prev.ry }, { ...next, duration: L * 0.12, ease: 'power2.inOut' }, at(s, L, k / n - 0.07))
+        tl.fromTo(t.globe, { stop: k - 1 }, { stop: k, duration: L * 0.12, ease: 'power2.inOut' }, at(s, L, k / n - 0.07))
         tl.fromTo(t.globe, { pins: k }, { pins: k + 1, duration: L * 0.06 }, at(s, L, k / n))
         if (!isHub(stops[k]!)) tl.fromTo(t.globe, { arcs }, { arcs: ++arcs, duration: L * 0.1 }, at(s, L, k / n))
         prev = next

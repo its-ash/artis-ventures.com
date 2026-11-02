@@ -68,7 +68,7 @@ All values are in `scene/keyframes.ts`:
 
 | Key | Controls |
 |---|---|
-| `DAMP` | Smoothing time (s) of every damped value |
+| `DAMP`, `CAMERA_DAMP` | Smoothing time (s) of damped values; the camera is heavier |
 | `preload.*` | Minimum and maximum preloader time, glass fill duration, edge opacity at rest |
 | `hero.pin` | Hero pin length in viewport heights |
 | `hero.idle` | Start camera and arch pose, idle swing (±6°) and speed |
@@ -77,7 +77,7 @@ All values are in `scene/keyframes.ts`:
 | `hero.handoff` | Scroll range in which the portal hands over to the DOM video |
 | `portal.planeZ` | Depth of the video plane seen through the opening |
 | `stage.camera` | Camera for every section after the hero |
-| `particles.*` | Particle count (desktop / mobile), point size, curl-noise strength |
+| `matrix.*` | Numeral cell size (desktop / mobile), globe dot lattice size (desktop / mobile) |
 | `story.video` | Stage video opacity, blur and scale in Who We Are |
 | `story.enter`, `story.dock`, `story.pillarRange` | Arch re-entry pose; where and how big the strokes dock beside the pillars |
 | `glance.*` | Pin length, numeral position, where each numeral morph starts and how long it takes |
@@ -93,13 +93,13 @@ Screen positions marked `(vx, vy)` are fractions of the half-viewport: -1 is the
 
 `scene/choreography.ts` turns these values into the scroll track, section by section. `scene/track.ts` keeps every scene value in one timeline in scroll-pixel time, so fast jumps in either direction always land on the right state.
 
-Quality tiers (`store.quality`): 3 full, 2 no postprocessing, 1 no transmission, 0 fewer particles. `PerformanceMonitor` steps down when FPS drops. Touch and narrow screens start at 1.
+Quality tiers (`store.quality`): 3 full, 2 no postprocessing, 1 no transmission, 0 coarser matrix cells. `PerformanceMonitor` steps down when FPS drops. Touch and narrow screens start at 1.
 
 ## Fallbacks
 
 | Case | Behaviour |
 |---|---|
-| Below 1024px or touch | Rim-lit standard material instead of glass transmission, no postprocessing, 3k particles, native scroll. Objects move above the text column (`keyframes.mobile`). Pins are shorter (`mobile.pinScale`, `mobile.heroPin`). Capability cards stack; approach steps stack so only the active one shows. |
+| Below 1024px or touch | Rim-lit standard material instead of glass transmission, no postprocessing, coarser matrix cells, native scroll. Objects move above the text column (`keyframes.mobile`). Pins are shorter (`mobile.pinScale`, `mobile.heroPin`). Capability cards stack; approach steps stack so only the active one shows. |
 | `prefers-reduced-motion` | No pins, flights or preloader. Each section shows a still of its object (`scene/still.ts`), swapped with short fades. Scene objects snap instead of damping. Decorative videos hold their poster frame. Text reveals are fades. |
 | No WebGL | No canvas. Sections keep their own backgrounds, fallback videos and posters, and an SVG arch poster in the hero and contact. All DOM content and the form work. |
 | No JS | Server-rendered page with all copy, lists unstacked, videos autoplaying with posters. |

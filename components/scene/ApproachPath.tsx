@@ -5,7 +5,7 @@ import * as THREE from 'three'
 import { useFrame } from '@react-three/fiber'
 import { damp } from 'maath/easing'
 import { disposeAll, GLOW } from '@/components/scene/geometry'
-import { matrixMaterial } from '@/components/scene/matrix'
+import { disposeFace, FACE, faceMaterial } from '@/components/scene/faces'
 import { cubeEdges, cubeGeometry } from '@/components/scene/sampling'
 import { DAMP, keyframes as K } from '@/scene/keyframes'
 import { frameStep, targets } from '@/scene/store'
@@ -29,7 +29,7 @@ export function ApproachPath() {
   )
   const end = useMemo(() => cubeGeometry(), [])
   const endEdges = useMemo(() => cubeEdges(), [])
-  const endRain = useMemo(() => matrixMaterial(41.7), [])
+  const endFace = useMemo(() => faceMaterial(FACE.target, 41.7), [])
   const group = useRef<THREE.Group>(null)
   const tubeMesh = useRef<THREE.Mesh<THREE.TubeGeometry, THREE.MeshBasicMaterial>>(null)
   const ghostLine = useRef<THREE.Line<THREE.BufferGeometry, THREE.LineBasicMaterial>>(null)
@@ -38,8 +38,11 @@ export function ApproachPath() {
   const last = K.approach.nodes.at(-1)!
 
   useEffect(
-    () => () => disposeAll(tube, ghost, end, endEdges, endRain, ghostObj.material as THREE.Material),
-    [tube, ghost, end, endEdges, endRain, ghostObj],
+    () => () => {
+      disposeFace(endFace)
+      disposeAll(tube, ghost, end, endEdges, ghostObj.material as THREE.Material)
+    },
+    [tube, ghost, end, endEdges, endFace, ghostObj],
   )
 
   useFrame((state, dt) => {
@@ -81,7 +84,7 @@ export function ApproachPath() {
       </mesh>
       <primitive ref={ghostLine} object={ghostObj} />
       <group ref={node} position={last}>
-        <mesh geometry={end} material={endRain} renderOrder={1} />
+        <mesh geometry={end} material={endFace} renderOrder={1} />
         <lineSegments geometry={endEdges} renderOrder={2}>
           <lineBasicMaterial color={GLOW} transparent opacity={0} toneMapped={false} />
         </lineSegments>

@@ -53,12 +53,24 @@ export function Footer() {
           </a>
         </div>
       </div>
+      {/* Each letter: teal outline under a graphite fill; with motion the letters rise, the fill sweeps up
+          and a light band glides across. Without JS the filled word shows as is. */}
       <p
         aria-hidden="true"
         data-footer-word
-        className="display pointer-events-none select-none px-(--pad) text-center text-[26vw] leading-[0.78] text-graphite-800"
+        className="display pointer-events-none relative select-none px-(--pad) text-center text-[26vw] leading-[0.78]"
       >
-        {footer.word}
+        {[...footer.word].map((ch, i) => (
+          <span key={i} data-footer-char className="text-outline pointer-events-auto relative inline-block">
+            {ch}
+            <span data-footer-fill className="absolute inset-0 text-graphite-800">
+              {ch}
+            </span>
+          </span>
+        ))}
+        <span data-footer-glint className="text-outline-glint absolute inset-0 px-(--pad)" style={{ clipPath: 'inset(0% 100% 0% 0%)' }}>
+          {footer.word}
+        </span>
       </p>
     </footer>
   )
