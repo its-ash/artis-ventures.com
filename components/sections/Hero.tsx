@@ -1,7 +1,6 @@
 import { ArchPoster } from '@/components/brand/ArchPoster'
 import { SplitHeadline } from '@/components/ui/SplitHeadline'
-import { TOTAL, pad } from '@/components/ui/sectionMeta'
-import { brand, hero, ui } from '@/content/site'
+import { brand, hero } from '@/content/site'
 
 // Transparent: the fixed stage video (and the 3D arch, when available) sits behind it.
 export function Hero() {
@@ -27,12 +26,7 @@ export function Hero() {
           <p className="display h-md col-span-12 md:col-span-5">{hero.sub}</p>
           <p className="prose-w col-span-12 text-mist-400 md:col-span-6 md:col-start-7">{hero.pitch}</p>
         </div>
-        <div className="hair mt-10 flex items-center justify-between border-t pt-5 md:mt-14">
-          <p className="label text-mist-400">{brand.presence}</p>
-          <p className="label text-stone-50" aria-hidden="true">
-            {ui.scroll} <span className="text-teal-500">[00/{pad(TOTAL)}]</span>
-          </p>
-        </div>
+        <p className="label hair mt-10 border-t pt-5 text-mist-400 md:mt-14">{brand.presence}</p>
       </div>
     </section>
   )

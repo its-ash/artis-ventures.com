@@ -9,9 +9,9 @@ import { CAMERA_DAMP, DAMP, keyframes as K } from '@/scene/keyframes'
 import { flux, frameStep, targets } from '@/scene/store'
 
 const OFFSET = new THREE.Vector3(...K.approach.camOffset)
-// Scroll-speed warp: a slight bank in the scroll direction and a wider lens.
-const ROLL = 0.03
-const FOV_KICK = 4
+// Scroll-speed response: a barely-there bank and lens breath, so fast scrolls feel weighted, not warped.
+const ROLL = 0.012
+const FOV_KICK = 1.5
 
 // Damps toward the camera targets; `path.follow` blends in a ride along the approach curve.
 export function CameraRig() {

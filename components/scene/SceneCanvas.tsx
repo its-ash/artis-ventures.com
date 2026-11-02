@@ -4,8 +4,7 @@ import { Suspense, useEffect, useMemo, useRef } from 'react'
 import * as THREE from 'three'
 import { Canvas, useFrame, useThree } from '@react-three/fiber'
 import { Environment, PerformanceMonitor, useProgress } from '@react-three/drei'
-import { Bloom, ChromaticAberration, EffectComposer, Noise, Scanline, Vignette } from '@react-three/postprocessing'
-import type { ScanlineEffect } from 'postprocessing'
+import { Bloom, ChromaticAberration, EffectComposer, Vignette } from '@react-three/postprocessing'
 import gsap from 'gsap'
 import { ApproachPath } from '@/components/scene/ApproachPath'
 import { Arch } from '@/components/scene/Arch'
@@ -53,24 +52,18 @@ function FrameGate() {
   return null
 }
 
-// Lens split and holographic scanlines grow with scroll speed (the uniform holds this vector by reference).
-const SPLIT = 0.0022
-const SCAN = { density: 1.4, rest: 0.035, boost: 0.16 }
+// Clean optics: soft bloom and vignette; a faint lens split only while scrolling fast
+// (the uniform holds this vector by reference).
+const SPLIT = 0.0009
 
 function Effects() {
   const offset = useMemo(() => new THREE.Vector2(), [])
-  const scan = useRef<ScanlineEffect>(null)
-  useFrame(() => {
-    offset.set(flux.v * SPLIT, flux.a * SPLIT * 0.4)
-    if (scan.current) scan.current.blendMode.opacity.value = SCAN.rest + flux.a * SCAN.boost
-  })
+  useFrame(() => void offset.set(flux.v * SPLIT, flux.a * SPLIT * 0.4))
   return (
     <EffectComposer multisampling={0} enableNormalPass={false}>
-      <Bloom mipmapBlur luminanceThreshold={0.85} luminanceSmoothing={0.2} intensity={0.55} />
-      <ChromaticAberration offset={offset} radialModulation modulationOffset={0.25} />
-      <Scanline ref={scan} density={SCAN.density} opacity={SCAN.rest} />
-      <Noise premultiply opacity={0.03} />
-      <Vignette offset={0.3} darkness={0.55} />
+      <Bloom mipmapBlur luminanceThreshold={0.88} luminanceSmoothing={0.25} intensity={0.45} />
+      <ChromaticAberration offset={offset} radialModulation modulationOffset={0.35} />
+      <Vignette offset={0.35} darkness={0.45} />
     </EffectComposer>
   )
 }

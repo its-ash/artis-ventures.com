@@ -26,7 +26,6 @@ export const ui = {
   cta: 'Begin a conversation', // brief
   menu: 'Menu',
   close: 'Close',
-  scroll: 'Scroll ↓',
   copy: 'Click to copy',
   copied: 'Copied',
   primaryNav: 'Primary',

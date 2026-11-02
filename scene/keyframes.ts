@@ -7,7 +7,7 @@ import { FRONT_Z, OPENING } from './aShape'
 
 export const DAMP = 0.15
 // The camera is heavier than the objects: it glides a beat behind the scroll.
-export const CAMERA_DAMP = 0.24
+export const CAMERA_DAMP = 0.32
 
 const office = (id: string) => offices.items.find((o) => o.id === id)!
 
@@ -27,7 +27,7 @@ export const keyframes = {
   },
 
   hero: {
-    pin: 3, // viewport heights
+    pin: 2.2, // viewport heights
     idle: {
       camera: { x: 0, y: 0, z: 9, tx: 0, ty: 0, tz: 0, fov: 35 },
       object: { x: 0, y: 0, z: 0, rx: 0, ry: 0, rz: 0, scale: 1, opacity: 1, idle: 1 },
@@ -60,7 +60,7 @@ export const keyframes = {
   },
 
   glance: {
-    pin: 2.8, // 4 steps × 70vh
+    pin: 2, // 4 steps × 50vh
     numeral: { x: -0.42, y: 0, scale: 1 }, // (vx, vy)
     morphs: [0.08, 0.33, 0.58, 0.83], // pin progress where numeral n → n+1 starts (first is in the approach)
     morphLen: 0.14,
@@ -74,7 +74,7 @@ export const keyframes = {
   menu: { recede: { scale: 0.6, opacity: 0.25 } },
 
   approach: {
-    pin: 4, // 5 steps × 80vh
+    pin: 2.8, // 5 steps × 56vh
     video: 0.25,
     nodes: [
       [-3.2, -0.6, 0],
@@ -89,7 +89,7 @@ export const keyframes = {
   },
 
   reach: {
-    pin: 3.5, // 5 stops × 70vh
+    pin: 2.6, // 5 stops × 52vh
     globe: { x: 0.45, y: -0.02, radius: 1.7, scale: 1 }, // x, y in (vx, vy)
     tilt: -0.18, // rad, stop sits a little below the globe centre
     // Tint per stop, in `stops` order, from the site palette (teal, mist, stone):
@@ -113,7 +113,7 @@ export const keyframes = {
 
   // Below 1024px: objects sit above the text column, pins are shorter.
   mobile: {
-    heroPin: 2.2,
+    heroPin: 1.6,
     pinScale: 0.6, // glance, approach, reach
     story: { x: 0, y: 0.32, scale: 0.42 },
     numeral: { x: 0, y: 0.36, scale: 0.42 },

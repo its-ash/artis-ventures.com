@@ -27,6 +27,9 @@ const RISE = { duration: 1.2, ease: 'expo.out' } as const
 const FADE = { duration: 0.45, ease: 'power1.out' } as const
 // Non-pinned triggers refresh after pins so their positions include pin spacing.
 const LATE = { refreshPriority: -1 } as const
+// Reveals and non-pinned scrubs start this many px before their nominal viewport line.
+const EARLY = 300
+const early = (pos: string) => `${pos}+=${EARLY}`
 
 // Plays a paused timeline once its trigger enters. A callback trigger has its positions at once; a `once`
 // trigger owned by a timeline waits a tick, so another trigger's refresh can fire and kill it mid-loop.
@@ -42,7 +45,7 @@ function useLenis() {
     let off = false
     let stop = () => {}
     void import('lenis').then(({ default: L }) => {
-      if (!off) stop = startLenis(new L({ autoRaf: false, lerp: 0.09, wheelMultiplier: 0.9 }))
+      if (!off) stop = startLenis(new L({ autoRaf: false, lerp: 0.1, wheelMultiplier: 1 }))
     })
     return () => {
       off = true
@@ -106,9 +109,15 @@ function textReveals(motion: boolean) {
   for (const el of qa('[data-split]')) {
     if (el.id === 'hero-title') continue
     if (!motion) {
-      gsap.from(el, { autoAlpha: 0, duration: 0.8, scrollTrigger: { trigger: el, start: 'top 88%', once: true, ...LATE } })
+      gsap.from(el, { autoAlpha: 0, duration: 0.8, scrollTrigger: { trigger: el, start: early('top 88%'), once: true, ...LATE } })
       continue
     }
+    // Depth: the headline settles from 94% to full size as it travels up the viewport.
+    gsap.fromTo(
+      el,
+      { scale: 0.94, transformOrigin: '0% 100%' },
+      { scale: 1, ease: 'none', scrollTrigger: { trigger: el, start: early('top bottom'), end: early('top 45%'), scrub: true, ...LATE } },
+    )
     let st: ScrollTrigger | undefined
     SplitText.create(el.firstElementChild!, {
       type: 'lines',
@@ -124,7 +133,7 @@ function textReveals(motion: boolean) {
           .timeline({ paused: true })
           .from(self.lines, { yPercent: MASK, ...RISE, stagger: 0.09 }, 0)
           .from(self.lines, { opacity: 0, ...FADE, stagger: 0.09 }, 0)
-        st = playOnce(el, 'top 88%', tl)
+        st = playOnce(el, early('top 88%'), tl)
         return tl
       },
     })
@@ -135,7 +144,7 @@ function textReveals(motion: boolean) {
       y: motion ? 28 : 0,
       duration: 1.1,
       ease: 'power3.out',
-      scrollTrigger: { trigger: el, start: 'top 84%', once: true, ...LATE },
+      scrollTrigger: { trigger: el, start: early('top 84%'), once: true, ...LATE },
     })
 }
 
@@ -185,14 +194,14 @@ function storyDom() {
     gsap.fromTo(
       words,
       { opacity: 0.15 },
-      { opacity: 1, stagger: 0.1, ease: 'none', scrollTrigger: { trigger: h2, start: 'top 80%', end: 'bottom 35%', scrub: true, ...LATE } },
+      { opacity: 1, stagger: 0.1, ease: 'none', scrollTrigger: { trigger: h2, start: early('top 80%'), end: early('bottom 35%'), scrub: true, ...LATE } },
     )
   }
   for (const el of qa('[data-pillar]'))
     gsap.fromTo(
       el,
       { opacity: 0.3 },
-      { opacity: 1, ease: 'none', scrollTrigger: { trigger: el, start: K.story.pillarRange[0], end: 'top 60%', scrub: true, ...LATE } },
+      { opacity: 1, ease: 'none', scrollTrigger: { trigger: el, start: early(K.story.pillarRange[0]), end: early('top 60%'), scrub: true, ...LATE } },
     )
 }
 
@@ -261,7 +270,7 @@ function trackDom() {
       scrollTrigger: {
         trigger: track,
         start: K.capabilities.trackStart,
-        end: () => `+=${Math.max(dist() * 2, innerHeight * 1.5)}`,
+        end: () => `+=${Math.max(dist() * 1.4, innerHeight)}`,
         pin: true,
         scrub: 0.8,
         invalidateOnRefresh: true,
@@ -279,7 +288,7 @@ function menuDom() {
     gsap.fromTo(
       s,
       { scaleX: 0 },
-      { scaleX: 1, duration: 1.1, ease: 'power3.inOut', scrollTrigger: { trigger: s.parentElement, start: 'top 88%', once: true, ...LATE } },
+      { scaleX: 1, duration: 1.1, ease: 'power3.inOut', scrollTrigger: { trigger: s.parentElement, start: early('top 88%'), once: true, ...LATE } },
     )
 
   const track = q('[data-marquee-track]')
@@ -383,7 +392,7 @@ function leadershipDom() {
     const tl = gsap.timeline({ paused: true })
     tl.fromTo(box, { clipPath: 'inset(100% 0% 0% 0%)' }, { clipPath: 'inset(0% 0% 0% 0%)', duration: 1.2, ease: 'power4.inOut' })
     if (inner) tl.fromTo(inner, { scale: 1.12 }, { scale: 1, duration: 1.6, ease: 'power3.out' }, 0)
-    playOnce(box, 'top 80%', tl)
+    playOnce(box, early('top 80%'), tl)
   }
   for (const h of qa('[data-leader-name]'))
     SplitText.create(h, {
@@ -397,7 +406,7 @@ function leadershipDom() {
           duration: 0.9,
           ease: 'power4.out',
           stagger: 0.08,
-          scrollTrigger: { trigger: h, start: 'top 85%', once: true, ...LATE },
+          scrollTrigger: { trigger: h, start: early('top 85%'), once: true, ...LATE },
         }),
     })
 }
@@ -434,7 +443,7 @@ function labelDom() {
       duration: Math.min(1.4, 0.5 + text.length * 0.03),
       ease: 'none',
       scrambleText: { text, chars: GLYPHS, speed: 0.5, revealDelay: 0.15 },
-      scrollTrigger: { trigger: el, start: 'top 90%', once: true, ...LATE },
+      scrollTrigger: { trigger: el, start: early('top 90%'), once: true, ...LATE },
     })
   }
 }
@@ -444,8 +453,8 @@ function labelDom() {
 // On fine pointers a hovered letter stretches up and its fill fades to show the teal outline.
 function footerDom() {
   const chars = qa('[data-footer-char]')
-  const st = { trigger: 'footer', start: 'top bottom', end: 'bottom bottom', scrub: true, ...LATE }
-  const inView = { trigger: 'footer', start: 'top 60%', toggleActions: 'play pause resume pause', ...LATE }
+  const st = { trigger: 'footer', start: early('top bottom'), end: 'bottom bottom', scrub: true, ...LATE }
+  const inView = { trigger: 'footer', start: early('top 60%'), toggleActions: 'play pause resume pause', ...LATE }
   gsap
     .timeline({ defaults: { ease: 'none' }, scrollTrigger: st })
     .fromTo(chars, { yPercent: 70 }, { yPercent: 0, stagger: 0.08, duration: 0.6 }, 0)

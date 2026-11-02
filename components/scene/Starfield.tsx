@@ -10,12 +10,12 @@ import { flux, frameStep, targets, useScene } from '@/scene/store'
 // Data stars in a box around the stage that flow toward the camera. At rest they drift as points;
 // scroll speed stretches them into hyperspace streaks (direction follows the scroll).
 // Shown on graphite sections only: they fade out under the stone layer.
-const FIELD = { count: 1800, mobileCount: 700, x: 14, y: 9, near: 7, far: -26 }
+const FIELD = { count: 1100, mobileCount: 450, x: 14, y: 9, near: 7, far: -26 }
 const DEPTH = FIELD.near - FIELD.far
 // Travel speed (world units/s) at rest and per unit of scroll speed; streak length per unit of scroll speed.
-const DRIFT = 0.25
-const WARP = 9
-const STREAK = 2.2
+const DRIFT = 0.18
+const WARP = 4
+const STREAK = 0.8
 
 const geometry = (count: number) => {
   const pos = new Float32Array(count * 6)
@@ -100,7 +100,7 @@ export function Starfield() {
     const u = (m.material as THREE.ShaderMaterial).uniforms
     u.uTravel!.value = l.travel
     u.uStreak!.value = moving ? flux.v * STREAK : 0
-    u.uOpacity!.value = l.dark * 0.8
+    u.uOpacity!.value = l.dark * 0.45
   })
 
   return <lineSegments ref={lines} geometry={geo} material={mat} frustumCulled={false} renderOrder={-2} />
