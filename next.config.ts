@@ -31,6 +31,7 @@ const server: NextConfig = {
 const config: NextConfig = {
   reactStrictMode: true,
   poweredByHeader: false,
+  basePath: exporting ? '/artis-ventures.com' : '',
   ...(exporting ? { output: 'export', trailingSlash: true, images: { unoptimized: true } } : server),
 }
 

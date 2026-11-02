@@ -1,7 +1,7 @@
-:HL["/_next/static/chunks/0tbzepu8q3bk8.css","style"]
-:HL["/_next/static/media/00803a8b82798b86-s.p.3wvp_8-4tyhex.woff2","font",{"crossOrigin":"","type":"font/woff2"}]
-:HL["/_next/static/media/1fa86a2d08bd8b95-s.p.29qgz_kunhae4.woff2","font",{"crossOrigin":"","type":"font/woff2"}]
-:HL["/_next/static/media/fd8cf3e7b62747c9-s.p.0schr0lclylgv.woff2","font",{"crossOrigin":"","type":"font/woff2"}]
+:HL["/artis-ventures.com/_next/static/chunks/0tbzepu8q3bk8.css","style"]
+:HL["/artis-ventures.com/_next/static/media/00803a8b82798b86-s.p.3wvp_8-4tyhex.woff2","font",{"crossOrigin":"","type":"font/woff2"}]
+:HL["/artis-ventures.com/_next/static/media/1fa86a2d08bd8b95-s.p.29qgz_kunhae4.woff2","font",{"crossOrigin":"","type":"font/woff2"}]
+:HL["/artis-ventures.com/_next/static/media/fd8cf3e7b62747c9-s.p.0schr0lclylgv.woff2","font",{"crossOrigin":"","type":"font/woff2"}]
 2:[["children",{"s":"__PAGE__","h":160}]]
 1:[["children",{"s":{"n":"legacy","t":"d","k":"business-plan-writing","s":["affiliate-program","privacy-statement"]},"h":65600,"c":"$Q2"}]]
-0:{"b":"GRGkWXDFhjpOqPkWr3NVc","t":{"t":{"s":"","h":131088,"c":"$Q1"}}}
+0:{"b":"T2uLeCUVi1DNobY8AEcx_","t":{"t":{"s":"","h":131088,"c":"$Q1"}}}
