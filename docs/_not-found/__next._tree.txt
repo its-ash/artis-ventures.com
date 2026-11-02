@@ -1,4 +1,4 @@
-:HL["/artis-ventures.com/_next/static/chunks/0wm_43fbw-cvc.css","style"]
+:HL["/_next/static/chunks/0wm_43fbw-cvc.css","style"]
 2:[["children",{"s":"__PAGE__","h":160}]]
 1:[["children",{"s":"/_not-found","h":64,"c":"$Q2"}]]
-0:{"b":"3RHtobcmfbDztRi8ZcMRD","t":{"t":{"s":"","h":16,"c":"$Q1"}}}
+0:{"b":"p5-tftkt23fKKmcxMHHMT","t":{"t":{"s":"","h":16,"c":"$Q1"}}}
