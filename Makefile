@@ -8,12 +8,15 @@ PROMPT := Write a concise git commit message for this staged diff. Output ONLY t
 run:
 	npm run dev
 
-# Static export for GitHub Pages: out/ → docs/ under the /artis-ventures.com project path, no Jekyll.
+# Static export for GitHub Pages: out/ → docs/ on the custom domain, no Jekyll.
+DOMAIN := artis-ventures.com
+
 build:
 	npm run export
 	rm -rf docs
 	cp -R out docs
 	touch docs/.nojekyll
+	echo '$(DOMAIN)' > docs/CNAME
 
 deploy: build
 	git checkout main

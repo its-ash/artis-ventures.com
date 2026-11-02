@@ -9,7 +9,7 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
-    "export": "STATIC_EXPORT=1 NEXT_PUBLIC_SITE_URL=https://its-ash.github.io/artis-ventures.com next build",
+    "export": "STATIC_EXPORT=1 NEXT_PUBLIC_SITE_URL=https://artis-ventures.com next build",
     "start": "next start",
     "lint": "eslint .",
     "typecheck": "tsc --noEmit"
