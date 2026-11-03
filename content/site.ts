@@ -253,8 +253,8 @@ export const reach = {
   reachLabel: 'Regulatory Reach', // p6
   caption: 'Regulatory frameworks we navigate', // brief
   regulators: [
-    { code: 'CMA', country: 'United Arab Emirates', lat: 24.45, lon: 54.38 },
-    { code: 'FCA', country: 'United Kingdom', lat: 51.51, lon: -0.13 },
+    { code: 'CMA', country: 'United Arab Emirates', lat: 24.45, lon: 54.38, office: 'registered' },
+    { code: 'FCA', country: 'United Kingdom', lat: 51.51, lon: -0.13, office: 'london' },
     { code: 'FSC', country: 'Mauritius', lat: -20.16, lon: 57.5 },
   ],
 } as const

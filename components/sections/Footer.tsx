@@ -1,4 +1,5 @@
 import { Logo } from '@/components/brand/Logo'
+import { FooterWordmark } from '@/components/footer/FooterWordmark'
 import Link from 'next/link'
 import { footer, nav, offices, ui } from '@/content/site'
 import { asset } from '@/lib/base'
@@ -54,8 +55,9 @@ export function Footer() {
           </a>
         </div>
       </div>
-      {/* Each letter: teal outline under a graphite fill; with motion the letters rise, the fill sweeps up
-          and a light band glides across. Without JS the filled word shows as is. */}
+      {/* With WebGL the word is a 3D field of columns (FooterWordmark). Without it, each letter is a teal
+          outline under a graphite fill that rises and fills with the scroll. Without JS the filled word shows as is. */}
+      <FooterWordmark word={footer.word}>
       <p
         aria-hidden="true"
         data-footer-word
@@ -73,6 +75,7 @@ export function Footer() {
           {footer.word}
         </span>
       </p>
+      </FooterWordmark>
     </footer>
   )
 }

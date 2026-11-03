@@ -65,6 +65,10 @@ export const makeGlass = (quality: number) => {
           attenuationColor: TEAL,
           attenuationDistance: 2.4,
           specularIntensity: 1,
+          // A faint prism split and thin-film sheen on the glass edges.
+          dispersion: 0.35,
+          iridescence: 0.18,
+          iridescenceIOR: 1.3,
           clearcoat: 0.4,
           clearcoatRoughness: 0.2,
           envMapIntensity: 1.1,

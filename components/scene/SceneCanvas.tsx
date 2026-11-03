@@ -10,8 +10,8 @@ import { ApproachPath } from '@/components/scene/ApproachPath'
 import { Arch } from '@/components/scene/Arch'
 import { Blocks } from '@/components/scene/Blocks'
 import { CameraRig } from '@/components/scene/CameraRig'
-import { DotGlobe } from '@/components/scene/DotGlobe'
-import { NumeralMatrix } from '@/components/scene/NumeralMatrix'
+import { CubeWall } from '@/components/scene/CubeWall'
+import { Numerals } from '@/components/scene/Numerals'
 import { Shards } from '@/components/scene/Shards'
 import { Starfield } from '@/components/scene/Starfield'
 import { keyframes as K } from '@/scene/keyframes'
@@ -61,7 +61,8 @@ function Effects() {
   useFrame(() => void offset.set(flux.v * SPLIT, flux.a * SPLIT * 0.4))
   return (
     <EffectComposer multisampling={0} enableNormalPass={false}>
-      <Bloom mipmapBlur luminanceThreshold={0.88} luminanceSmoothing={0.25} intensity={0.45} />
+      {/* Threshold above the white cube wall, so only the HDR glows (values > 1) bloom. */}
+      <Bloom mipmapBlur luminanceThreshold={0.97} luminanceSmoothing={0.25} intensity={0.45} />
       <ChromaticAberration offset={offset} radialModulation modulationOffset={0.35} />
       <Vignette offset={0.35} darkness={0.45} />
     </EffectComposer>
@@ -109,10 +110,10 @@ export default function SceneCanvas() {
         </Suspense>
         <Arch />
         <Shards />
-        <NumeralMatrix />
+        <Numerals />
         <Blocks />
         <ApproachPath />
-        <DotGlobe />
+        <CubeWall />
         {quality >= 3 && !mobile && <Effects />}
       </Canvas>
     </div>

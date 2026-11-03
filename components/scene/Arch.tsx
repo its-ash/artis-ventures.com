@@ -9,7 +9,11 @@ import { buildArch, GLOW, makeGlass } from '@/components/scene/geometry'
 import { asset } from '@/lib/base'
 import { FRONT_Z, OPENING } from '@/scene/aShape'
 import { DAMP, keyframes as K } from '@/scene/keyframes'
-import { frameStep, targets, useScene, type VideoName } from '@/scene/store'
+import { flux, frameStep, targets, useScene, type VideoName } from '@/scene/store'
+
+// Idle float (world units, rad/s) and the lean that scroll speed gives the arch.
+const BOB = { amp: 0.06, speed: 0.6 }
+const LEAN = 0.18
 
 // World pose of the arch, shared with the portal plane (portal uses world units).
 export const archWorld = new THREE.Vector3()
@@ -85,11 +89,16 @@ export function Arch() {
     if (!g) return
     const o = targets().object
     const l = live.current
-    const swing = o.idle * Math.sin(state.clock.elapsedTime * K.hero.idle.speed) * K.hero.idle.swing
+    const time = state.clock.elapsedTime
+    const swing = o.idle * Math.sin(time * K.hero.idle.speed) * K.hero.idle.swing
     const step = frameStep(dt)
+    const moving = step === dt
+    const bob = moving ? o.idle * Math.sin(time * BOB.speed) * BOB.amp * o.scale : 0
+    // Fast scrolls tip the arch into the travel direction; it rights itself as the scroll settles.
+    const lean = moving ? flux.v * LEAN : 0
 
-    damp3(g.position, [o.x, o.y, o.z], DAMP, step)
-    dampE(g.rotation, [o.rx, o.ry + swing, o.rz], DAMP, step)
+    damp3(g.position, [o.x, o.y + bob, o.z], DAMP, step)
+    dampE(g.rotation, [o.rx + lean, o.ry + swing, o.rz], DAMP, step)
     damp3(g.scale, [o.scale, o.scale, o.scale], DAMP, step)
     damp(l, 'opacity', o.opacity, DAMP, step)
     damp(l, 'fill', o.fill, 0.35, step)

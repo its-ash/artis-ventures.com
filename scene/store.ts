@@ -1,7 +1,7 @@
 import { create } from 'zustand'
 
 export type VideoName = 'hero_city' | 'contact_city' | 'approach_caustics'
-export type Form = 'arch' | 'shards' | 'particles' | 'numerals' | 'blocks' | 'path' | 'globe'
+export type Form = 'arch' | 'shards' | 'particles' | 'numerals' | 'blocks' | 'path'
 // 3 full · 2 no postprocessing · 1 no transmission · 0 reduced particles
 export type Quality = 0 | 1 | 2 | 3
 
@@ -12,14 +12,14 @@ export const createTargets = () => ({
   object: { form: 'arch' as Form, ...pose(), morph: 0, opacity: 1, idle: 1, wire: 0, fill: 0 },
   // Three strokes; positions are local to the arch pose (`object`)
   shards: { opacity: 0, s: [pose(), pose(), pose()] },
-  // Pose and form of the numeral matrix and the globe land (no particles; name kept for the timeline).
-  // Morph index 0 arch · 1 100+ · 2 40+ · 3 15+ · 4 3 · 5 blocks · 6 globe · 7 arch
+  // Pose and form of the numeral matrix (no particles; name kept for the timeline).
+  // Morph index 0 arch · 1 100+ · 2 40+ · 3 15+ · 4 3 · 5 blocks
   particles: { ...pose(), opacity: 0, morph: 0, noise: 1, light: 0 },
-  // Row (capabilities) → path nodes (approach) → globe centre (reach)
+  // Row (capabilities) → path nodes (approach) → cube wall centre (reach)
   blocks: { opacity: 0, x: 0, y: 0, scale: 1, gap: 1.6, active: 0, toPath: 0, collapse: 0, gx: 0, gy: 0 },
   path: { opacity: 0, draw: 0, follow: 0 },
-  // spin: 1 free rotation · 0 settled on the stop in view; stop: index of the stop in view (tints the globe)
-  globe: { opacity: 0, pins: 0, arcs: 0, spin: 0, stop: 0 },
+  // Cube wall (reach): step = index of the stop card in front (fractional while the cubes turn)
+  wall: { opacity: 0, step: 0 },
   camera: { x: 0, y: 0, z: 9, tx: 0, ty: 0, tz: 0, fov: 35 },
   video: { opacity: 1, blur: 0, scale: 1 },
   video2: { opacity: 0 },
@@ -64,9 +64,6 @@ export const targets = () => useScene.getState().targets
 
 // Scroll velocity, damped: `v` signed (-1 up · 1 down), `a` magnitude. Written by SceneDirector, read in useFrame.
 export const flux = { v: 0, a: 0 }
-
-// Globe self-rotation about its polar axis: `raw` accumulates, `a` is the wrapped angle applied this frame.
-export const globeSpin = { raw: 0, a: 0 }
 
 // Damping step: real frame time normally; a large step (instant snap) under reduced motion.
 export const frameStep = (dt: number) => (useScene.getState().motion ? dt : 10)

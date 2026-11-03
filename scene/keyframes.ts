@@ -1,4 +1,3 @@
-import { offices, reach } from '@/content/site'
 import { FRONT_Z, OPENING } from './aShape'
 
 // Every tunable scene value. Scroll positions are fractions of the section's pinned scroll.
@@ -9,14 +8,9 @@ export const DAMP = 0.15
 // The camera is heavier than the objects: it glides a beat behind the scroll.
 export const CAMERA_DAMP = 0.32
 
-const office = (id: string) => offices.items.find((o) => o.id === id)!
-
 export const keyframes = {
   // Camera for every section after the hero (z = 0 plane is the layout plane).
   stage: { camera: { x: 0, y: 0, z: 9, tx: 0, ty: 0, tz: 0, fov: 35 } },
-
-  // Numerals: glyph cell size in raster px (desktop / mobile). Globe: lattice points sampled for the dots.
-  matrix: { cell: 9, mobileCell: 12, dots: 30000, mobileDots: 14000 },
 
   preload: {
     minTime: 1.2, // s, counter never finishes faster than this
@@ -89,18 +83,15 @@ export const keyframes = {
   },
 
   reach: {
-    pin: 2.6, // 5 stops × 52vh
-    globe: { x: 0.45, y: -0.02, radius: 1.7, scale: 1 }, // x, y in (vx, vy)
-    tilt: -0.18, // rad, stop sits a little below the globe centre
-    // Tint per stop, in `stops` order, from the site palette (teal, mist, stone):
-    // CMA (UAE) · FCA (UK) · FSC (Mauritius) · Dubai · Hong Kong
-    neon: ['#7fd6db', '#33b7c2', '#9aa3ab', '#eeebe5', '#5fc6cd'],
-    hub: { lat: office('dubai').lat, lon: office('dubai').lon },
-    stops: [
-      ...reach.regulators.map((r) => ({ lat: r.lat, lon: r.lon })),
-      { lat: office('dubai').lat, lon: office('dubai').lon },
-      { lat: office('hong-kong').lat, lon: office('hong-kong').lon },
-    ],
+    pin: 7, // 5 stops (content/stops.ts) × 140vh: each turn takes 84vh of scroll, each card holds 56vh
+    // Cube wall: `grid` × `grid` flush cubes; `size` is the wall side as a share of the shorter viewport side,
+    // `y` (vy) its centre. `open`: extra spacing per cell while the cubes turn (≥ 0.42 so a cube at 45° clears
+    // its neighbours); `spread`: share of the turn the wave takes to cross the wall; `lift`: turning cubes
+    // move toward the camera (share of a cell).
+    wall: { grid: 8, size: 0.72, y: 0, open: 0.5, spread: 0.55, lift: 0.3 },
+    // Scroll share of the whole pin for each stop change (centred on the stop boundary); keep it under
+    // 1 / stops so every card holds still for a while between turns.
+    turn: 0.12,
   },
 
   leadership: { range: ['top bottom', 'top 45%'] },
@@ -118,8 +109,24 @@ export const keyframes = {
     story: { x: 0, y: 0.32, scale: 0.42 },
     numeral: { x: 0, y: 0.36, scale: 0.42 },
     row: { x: 0, y: 0.5, scale: 0.34 },
-    globe: { x: 0, y: 0.34, scale: 0.6 },
+    wall: { grid: 6, size: 0.9, y: 0.04 },
     contact: { x: 0, y: 0.5, scale: 0.42 },
+  },
+
+  // Footer wordmark: a glyph sheet that dissolves in along a glowing front, rolls on a slow wave and stands up
+  // from its baseline as it scrolls in.
+  footer: {
+    px: 360, // raster type size (desktop); mobile uses 240
+    wave: 0.12, // surface wave height, world units
+    tilt: [-1.05, -0.12], // rad on X about the baseline: lying back → near upright
+    sweep: 5.5, // s per pass of the light band
+    sway: 0.05, // rad on Y
+    swaySpeed: 0.22, // rad/s
+    fit: 0.92, // word width as a share of the stage width
+    range: ['top bottom', 'bottom bottom'],
+    // The scene's arch fades out while the footer covers it (over the first 60% of this range).
+    // Ends at the page bottom, so it completes on any viewport height.
+    hide: ['top bottom', 'bottom bottom'],
   },
 
   stone: {

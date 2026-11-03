@@ -27,7 +27,7 @@ const validate = (d: FormData): Errors => {
 }
 
 const input =
-  'hair w-full border-b bg-transparent py-3 text-fg outline-none transition-colors placeholder:text-muted focus-visible:border-accent aria-invalid:border-[#ff8a80]'
+  'mt-2 w-full rounded-xl border border-stone-50/15 bg-graphite-950 px-4 py-3 text-fg outline-none transition-colors placeholder:text-muted hover:border-stone-50/30 focus-visible:border-accent aria-invalid:border-[#ff8a80]'
 
 export function ContactForm() {
   const uid = useId()

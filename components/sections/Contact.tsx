@@ -44,8 +44,10 @@ export function Contact() {
             ))}
           </dl>
         </div>
-        <div className="col-span-12 lg:col-span-5 lg:col-start-8">
-          <ContactForm />
+        <div className="col-span-12 lg:col-span-5 lg:col-start-8 lg:self-start">
+          <div className="rounded-2xl border border-stone-50/10 bg-graphite-800/95 [--line:rgb(238_235_229/0.18)] p-6 shadow-[0_32px_80px_-24px_rgb(0_0_0/0.85)] md:p-10">
+            <ContactForm />
+          </div>
         </div>
       </div>
     </section>
