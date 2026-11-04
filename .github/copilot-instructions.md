@@ -8,7 +8,7 @@
 ## Rules
 - All copy lives in `content/site.ts`. Do not put text in components.
 - Copy comes word for word from the company profile (`files/company_profile_2026.pdf`, not in git). Do not invent clients, figures or awards.
-- Never imply that Artis holds a CMA, FCA or FSC licence. Use "Regulatory frameworks we navigate".
+- Never imply that Artis holds a CMA, FCA or FSC licence. Artis helps clients acquire them: use "Licences we help clients acquire".
 - Colour tokens are CSS variables in `app/globals.css`. No gold. Teal text on light surfaces uses `--teal-700` for contrast.
 - No custom cursor, no cursor-follow or magnetic effects.
 - Animate only transform, opacity, clip-path; filter only on video.

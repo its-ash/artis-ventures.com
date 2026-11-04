@@ -48,28 +48,39 @@ export function Reach() {
           ))}
         </ol>
 
-        {/* Globe stage: stops stack into one cell and swap while the globe turns (with WebGL). */}
+        {/* Globe stage: two groups (regulators, offices) stack into one cell; their stops swap while the globe turns (with WebGL). */}
         <div className="grid-12 mt-24 min-h-svh items-end gap-y-10 pb-12 md:mt-32 lg:items-center lg:pb-0" data-reach-stage>
-          <div className="col-span-12 lg:col-span-5">
-            <p className="label text-muted">{reach.reachLabel}</p>
-            <ul className="mt-6" aria-describedby="reach-caption" data-stops>
-              {reach.regulators.map((r) => (
-                <li key={r.code} className="hair border-t py-8" data-stop>
-                  <p className="display text-[clamp(4rem,10vw,9rem)] leading-none">{r.code}</p>
-                  <p className="label mt-4 text-muted">{r.country}</p>
-                </li>
-              ))}
-              {stageOffices.map((o) => (
-                <li key={o.id} className="hair border-t py-8" data-stop>
-                  <p className="display text-[clamp(2.75rem,6vw,5.5rem)] leading-none">{o.label}</p>
-                  {'entity' in o && <p className="label mt-4 text-fg">{o.entity}</p>}
-                  {'licence' in o && <p className="label mt-2 text-muted">{o.licence}</p>}
-                </li>
-              ))}
-            </ul>
-            <p id="reach-caption" className="label hair border-t pt-4 text-muted">
-              {reach.caption}
-            </p>
+          <div className="col-span-12 flex flex-col gap-16 lg:col-span-5" data-stops>
+            <section aria-labelledby="reach-regulators" data-stop-group>
+              <h3 id="reach-regulators" className="label text-muted">
+                {reach.reachLabel}
+              </h3>
+              <ul className="mt-6" aria-describedby="reach-caption" data-stop-list>
+                {reach.regulators.map((r) => (
+                  <li key={r.code} className="hair border-t py-8" data-stop>
+                    <p className="display text-[clamp(4rem,10vw,9rem)] leading-none">{r.code}</p>
+                    <p className="label mt-4 text-muted">{r.country}</p>
+                  </li>
+                ))}
+              </ul>
+              <p id="reach-caption" className="label hair border-t pt-4 text-muted">
+                {reach.caption}
+              </p>
+            </section>
+            <section aria-labelledby="reach-offices" data-stop-group>
+              <h3 id="reach-offices" className="label text-muted">
+                {offices.label}
+              </h3>
+              <ul className="mt-6" data-stop-list>
+                {stageOffices.map((o) => (
+                  <li key={o.id} className="hair border-t py-8" data-stop>
+                    <p className="display text-[clamp(2.75rem,6vw,5.5rem)] leading-none">{o.label}</p>
+                    {'entity' in o && <p className="label mt-4 text-fg">{o.entity}</p>}
+                    {'licence' in o && <p className="label mt-2 text-muted">{o.licence}</p>}
+                  </li>
+                ))}
+              </ul>
+            </section>
           </div>
         </div>
 

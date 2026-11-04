@@ -365,22 +365,35 @@ function approachDom(desktop: boolean) {
 // Reach (pinned): CMA / FCA / FSC, then the two offices, swap one at a time while the globe turns to each stop.
 function reachDom() {
   const stage = q('[data-reach-stage]')
-  const list = q('[data-stops]')
+  const box = q('[data-stops]')
+  const groups = qa('[data-stop-group]')
   const items = qa('[data-stop]')
-  if (!stage || !list || !items.length) return null
+  if (!stage || !box || !groups.length || !items.length) return null
   const n = items.length
-  stack(list, items)
+  // Groups (regulators, offices) share one cell; inside each group its stops share one cell.
+  stack(box, groups)
+  for (const g of groups) {
+    const list = g.querySelector<HTMLElement>('[data-stop-list]')
+    if (list) stack(list, gsap.utils.toArray<HTMLElement>('[data-stop]', g))
+  }
+  const groupOf = (el: HTMLElement) => el.closest<HTMLElement>('[data-stop-group]')
   const tl = gsap.timeline({
     defaults: { ease: 'none', immediateRender: false },
     scrollTrigger: { trigger: stage, start: 'top top', end: `+=${layout().pin(K.reach.pin) * 100}%`, pin: true, scrub: true },
   })
-  for (let k = 1; k < n; k++)
-    tl.fromTo(items[k - 1]!, { opacity: 1, yPercent: 0 }, { opacity: 0, yPercent: -12, duration: 0.05 }, k / n - 0.04).fromTo(
-      items[k]!,
+  for (let k = 1; k < n; k++) {
+    const [a, b] = [items[k - 1]!, items[k]!]
+    const [ga, gb] = [groupOf(a), groupOf(b)]
+    tl.fromTo(a, { opacity: 1, yPercent: 0 }, { opacity: 0, yPercent: -12, duration: 0.05 }, k / n - 0.04).fromTo(
+      b,
       { opacity: 0, yPercent: 12 },
       { opacity: 1, yPercent: 0, duration: 0.05 },
       k / n,
     )
+    // Crossing from regulators to offices: the group (label, caption) swaps with the stop.
+    if (ga && gb && ga !== gb)
+      tl.fromTo(ga, { opacity: 1 }, { opacity: 0, duration: 0.05 }, k / n - 0.04).fromTo(gb, { opacity: 0 }, { opacity: 1, duration: 0.05 }, k / n)
+  }
   tl.set({}, {}, 1)
   return tl.scrollTrigger ?? null
 }

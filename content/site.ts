@@ -137,7 +137,7 @@ const practices = {
     title: 'Licensing, Compliance & Setup',
     items: [
       'Company Formation & Structuring',
-      'Regulatory Licensing (CMA · FCA · FSC)',
+      'Client Licence Acquisition (CMA · FCA · FSC)',
       'Virtual Asset (VARA / DFSA) Advisory',
       'Due Diligence & Compliance Management',
     ],
@@ -251,7 +251,7 @@ export const reach = {
     },
   ],
   reachLabel: 'Regulatory Reach', // p6
-  caption: 'Regulatory frameworks we navigate', // brief
+  caption: 'Licences we help clients acquire',
   regulators: [
     { code: 'CMA', country: 'United Arab Emirates', lat: 24.45, lon: 54.38 },
     { code: 'FCA', country: 'United Kingdom', lat: 51.51, lon: -0.13 },
