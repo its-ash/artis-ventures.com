@@ -39,6 +39,7 @@ Open items for the client:
 | `public/textures/stone.webp` | Limestone texture on light sections |
 | `public/hdri/city_512.hdr` | Environment map for the glass (drei "city" preset, self-hosted, downsized to 512 × 256, 390 KB) |
 | `public/og.jpg` | Open Graph / Twitter card image, 1200 × 630, cropped from the hero poster |
+| `public/textures/landmask.png` | Equirectangular land mask (white = land) for the globe dots, made from the three.js `earth_specular_2048.jpg` example texture (MIT) |
 
 Source files are in `files/` (not in git).
 
@@ -82,7 +83,8 @@ All values are in `scene/keyframes.ts`:
 | `capabilities.row`, `capabilities.trackStart` | Block row position, scale and gap; where the horizontal track pins |
 | `menu.recede` | Block scale and opacity behind the full menu |
 | `approach.*` | Pin length, caustics video opacity, the 5 path nodes, node size, camera offset and look-ahead |
-| `reach.*` | Pin length, cube wall (grid, size, centre, gap opening while turning, wave spread, lift), scroll share of each turn. Stops come from `content/stops.ts` |
+| `matrix.*` | Globe dot lattice size (desktop / mobile) |
+| `reach.*` | Pin length, globe position and radius, stop tilt, Dubai hub, the 5 stops (from `content/site.ts`) |
 | `leadership.range` | Where the canvas fades out |
 | `contact.*` | Arch pose on the left half, camera pull-back, scroll range |
 | `footer.*` | 3D wordmark: raster type size, surface wave height, tilt range, light-band period, sway, fit; its scroll range; where the stage canvas fades out under the footer |
@@ -119,7 +121,7 @@ The footer wordmark (`components/footer/`) is its own small canvas, loaded only 
 - Media: posters as WebP, H.264 videos with fast start, 512 px HDR (390 KB).
 - Landmarks, one `h1`, ordered headings, named links and controls, teal focus rings, a skip link. In-page links move keyboard focus to their target, also with Lenis.
 - The mobile menu is a modal dialog: content behind it is inert, focus moves in, Escape closes it and returns focus. The auto-hiding header comes back when it receives focus.
-- Stacked stages (glance, reach, mobile steps) hide items with opacity only, so screen readers read every item. In Reach the cube wall (`components/scene/CubeWall.tsx`) shows the stop cards; the DOM cards stay for screen readers, and show as a grid without WebGL or under reduced motion.
+- Stacked stages (glance, reach, mobile steps) hide items with opacity only, so screen readers read every item.
 - The marquee moves only while the user scrolls (no autonomous motion, WCAG 2.2.2).
 - Text contrast is at least 4.9:1 on both surfaces. Teal `#33b7c2` is used for text only on graphite; light sections use `--teal-700`.
 

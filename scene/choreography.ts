@@ -1,8 +1,8 @@
 import gsap from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import { capabilities, sections } from '@/content/site'
-import { stops } from '@/content/stops'
 import { SHARDS } from './aShape'
+import { faceRotation, nearAngle } from './geo'
 import { keyframes as K } from './keyframes'
 import { targets, useScene } from './store'
 import { at, type Segment } from './track'
@@ -21,6 +21,10 @@ export type Pins = {
 // Range-only triggers refresh after the pins so their positions include pin spacing.
 const range = (vars: ScrollTrigger.Vars) => ScrollTrigger.create({ refreshPriority: -1, ...vars })
 const qa = (s: string) => gsap.utils.toArray<HTMLElement>(s)
+
+export const stopRotation = (s: { lat: number; lon: number }) => faceRotation(s.lat, s.lon, K.reach.tilt)
+export const isHub = (s: { lat: number; lon: number }) =>
+  Math.abs(s.lat - K.reach.hub.lat) < 0.5 && Math.abs(s.lon - K.reach.hub.lon) < 0.5
 
 export function buildScene(p: Pins): Segment[] {
   const t = targets()
@@ -197,31 +201,50 @@ export function buildScene(p: Pins): Segment[] {
       .fromTo(t.blocks, { opacity: 1 }, { opacity: 0.35, duration: L }, s),
   )
 
-  // 12 · Reach (in): the blocks collapse into the wall centre as the cube wall fades up there.
-  const Wl = Lay.wall
+  // 12 · Reach (in): nodes fly into the globe centre as the land dots bloom.
+  const Gl = Lay.globe
+  const globe = { x: vx(Gl.x), y: vy(Gl.y) }
+  const stops = K.reach.stops
+  const rot0 = stopRotation(stops[0]!)
+  let last = rot0
   add(range({ trigger: '[data-reach-stage]', start: 'top bottom', end: 'top top' }), (tl, s, L) =>
     tl
-      .set(t.blocks, { gx: 0, gy: vy(Wl.y) }, s)
-      .set(t.wall, { step: 0 }, s)
+      .set(t.particles, { ...globe, z: 0, rx: rot0.rx, ry: rot0.ry, rz: 0, scale: Gl.scale, morph: 5, light: 0 }, s)
+      .set(t.blocks, { gx: globe.x, gy: globe.y }, s)
       .fromTo(t.blocks, { collapse: 0, opacity: 0.35 }, { collapse: 1, opacity: 0, duration: L * 0.55, ease: 'power2.in' }, s)
-      .fromTo(t.wall, { opacity: 0 }, { opacity: 1, duration: L * 0.4 }, at(s, L, 0.6)),
+      .fromTo(t.particles, { opacity: 0 }, { opacity: 1, duration: L * 0.3 }, at(s, L, 0.25))
+      .fromTo(t.particles, { morph: 5 }, { morph: 6, duration: L * 0.65, ease: 'power2.out' }, at(s, L, 0.25))
+      .fromTo(t.globe, { opacity: 0, pins: 0, arcs: 0 }, { opacity: 1, duration: L * 0.4 }, at(s, L, 0.55))
+      .set(t.globe, { spin: 1, stop: 0 }, s),
   )
 
-  // 13 · Reach (pinned): CMA → FCA → FSC → Dubai → Hong Kong; at each boundary the cubes turn to the next card.
+  // 13 · Reach (pinned): UAE → UK → Mauritius → Dubai → Hong Kong; pins rise, arcs draw from Dubai.
   if (p.reach)
     add(p.reach, (tl, s, L) => {
       const n = stops.length
-      const T = K.reach.turn
-      for (let k = 1; k < n; k++)
-        tl.fromTo(t.wall, { step: k - 1 }, { step: k, duration: L * T, ease: 'power1.inOut' }, at(s, L, k / n - T / 2))
+      let prev = rot0
+      let arcs = 0
+      // The free spin rolls forward into the first stop, then the stops take over.
+      tl.fromTo(t.globe, { spin: 1 }, { spin: 0, duration: L * 0.05 }, s)
+      tl.fromTo(t.globe, { pins: 0 }, { pins: 1, duration: L * 0.06 }, s)
+      if (!isHub(stops[0]!)) tl.fromTo(t.globe, { arcs: 0 }, { arcs: ++arcs, duration: L * 0.1 }, s)
+      for (let k = 1; k < n; k++) {
+        const r = stopRotation(stops[k]!)
+        const next = { rx: r.rx, ry: nearAngle(prev.ry, r.ry) }
+        tl.fromTo(t.particles, { rx: prev.rx, ry: prev.ry }, { ...next, duration: L * 0.12, ease: 'power2.inOut' }, at(s, L, k / n - 0.07))
+        tl.fromTo(t.globe, { stop: k - 1 }, { stop: k, duration: L * 0.12, ease: 'power2.inOut' }, at(s, L, k / n - 0.07))
+        tl.fromTo(t.globe, { pins: k }, { pins: k + 1, duration: L * 0.06 }, at(s, L, k / n))
+        if (!isHub(stops[k]!)) tl.fromTo(t.globe, { arcs }, { arcs: ++arcs, duration: L * 0.1 }, at(s, L, k / n))
+        prev = next
+      }
+      last = prev
     })
 
   // 14 · Leadership: canvas fades out; rendering pauses while hidden.
   const [ls, le] = K.leadership.range
   add(range({ trigger: '#leadership', start: ls, end: le }), (tl, s, L) => tl.fromTo(t.canvas, { opacity: 1 }, { opacity: 0, duration: L }, s))
 
-  // 15 · Contact: the wall stays gone (it left with the canvas in Leadership); the arch fades in
-  // on the left half as the canvas returns; portal shows contact_city.
+  // 15 · Contact: globe dots reassemble into the arch on the left half; portal shows contact_city.
   const C = K.contact
   const conR = range({
     trigger: '#contact',
@@ -237,9 +260,15 @@ export function buildScene(p: Pins): Segment[] {
     tl.set(t.object, { ...pose, opacity: 0, fill: 1, wire: 1, idle: 0 }, s)
       .fromTo(t.canvas, { opacity: 0 }, { opacity: 1, duration: L * 0.3 }, s)
       .fromTo(t.camera, { ...cam }, { ...cam, z, duration: L, ease: 'power2.inOut' }, s)
-      .set(t.wall, { opacity: 0 }, s)
-      .set(t.particles, { opacity: 0 }, s)
-      .fromTo(t.object, { opacity: 0, idle: 0 }, { opacity: 1, idle: 1, duration: L * 0.4, ease: 'power2.out' }, at(s, L, 0.1))
+      .fromTo(t.globe, { opacity: 1 }, { opacity: 0, duration: L * 0.3 }, s)
+      .fromTo(
+        t.particles,
+        { ...globe, z: 0, rx: last.rx, ry: last.ry, rz: 0, scale: Gl.scale, morph: 6 },
+        { ...pose, morph: 7, duration: L * 0.75, ease: 'power2.inOut' },
+        s,
+      )
+      .fromTo(t.particles, { opacity: 1 }, { opacity: 0, duration: L * 0.2 }, at(s, L, 0.8))
+      .fromTo(t.object, { opacity: 0, idle: 0 }, { opacity: 1, idle: 1, duration: L * 0.2 }, at(s, L, 0.8))
   })
 
   // 16 · Footer: the opaque footer covers the stage, so the canvas fades out and rendering pauses.

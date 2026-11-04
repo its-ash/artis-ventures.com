@@ -362,26 +362,27 @@ function approachDom(desktop: boolean) {
   return { pin: st, off: () => ScrollTrigger.removeEventListener('scrollEnd', snap) }
 }
 
-// Reach (pinned): the cube wall (CubeWall, driven by scene/choreography) shows the stop cards at the centre.
-// The DOM cards stack into one cell at opacity 0, so screen readers still read every stop; the counter syncs.
+// Reach (pinned): CMA / FCA / FSC, then the two offices, swap one at a time while the globe turns to each stop.
 function reachDom() {
   const stage = q('[data-reach-stage]')
   const list = q('[data-stops]')
   const items = qa('[data-stop]')
-  const count = q('[data-reach-count]')
   if (!stage || !list || !items.length) return null
   const n = items.length
   stack(list, items)
-  gsap.set(list, { opacity: 0, pointerEvents: 'none' })
-  const st = ScrollTrigger.create({
-    trigger: stage,
-    start: 'top top',
-    end: `+=${layout().pin(K.reach.pin) * 100}%`,
-    pin: true,
-    onUpdate: (s) => count && (count.textContent = `[${pad(Math.min(n - 1, Math.floor(s.progress * n)) + 1)}/${pad(n)}]`),
+  const tl = gsap.timeline({
+    defaults: { ease: 'none', immediateRender: false },
+    scrollTrigger: { trigger: stage, start: 'top top', end: `+=${layout().pin(K.reach.pin) * 100}%`, pin: true, scrub: true },
   })
-  if (count) count.textContent = `[${pad(1)}/${pad(n)}]`
-  return st
+  for (let k = 1; k < n; k++)
+    tl.fromTo(items[k - 1]!, { opacity: 1, yPercent: 0 }, { opacity: 0, yPercent: -12, duration: 0.05 }, k / n - 0.04).fromTo(
+      items[k]!,
+      { opacity: 0, yPercent: 12 },
+      { opacity: 1, yPercent: 0, duration: 0.05 },
+      k / n,
+    )
+  tl.set({}, {}, 1)
+  return tl.scrollTrigger ?? null
 }
 
 // Leadership: photo clip-path bottom-up with inner scale 1.12 → 1; names rise by line.

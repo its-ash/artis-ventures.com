@@ -24,7 +24,7 @@ export const layout = () => {
     story: m ? { ...K.story.enter, ...M.story } : K.story.enter,
     numeral: m ? M.numeral : K.glance.numeral,
     row: m ? { ...K.capabilities.row, ...M.row } : K.capabilities.row,
-    wall: m ? { ...K.reach.wall, ...M.wall } : K.reach.wall,
+    globe: m ? { ...K.reach.globe, ...M.globe } : K.reach.globe,
     contact: m ? M.contact : K.contact.arch,
     heroPin: m ? M.heroPin : K.hero.pin,
     pin: (n: number) => (m ? n * M.pinScale : n),

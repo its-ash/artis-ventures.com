@@ -1,4 +1,6 @@
 import * as THREE from 'three'
+import { asset } from '@/lib/base'
+import { latLonToVec } from '@/scene/geo'
 
 // Unit cube (capabilities blocks, path nodes): transparent faces, border on the 12 edges.
 export const cubeGeometry = () => new THREE.BoxGeometry(1, 1, 1)
@@ -7,6 +9,44 @@ export const cubeEdges = () => {
   const edges = new THREE.EdgesGeometry(box)
   box.dispose()
   return edges
+}
+
+// Dot globe: a Fibonacci lattice of `n` points, flagged by an equirectangular mask (white = land).
+// Every land point stays; one sea point in three stays as a dim ocean. Points geometry with
+// aLand (1 land · 0 sea) and aRnd.
+export const landDots = async (radius: number, n: number, src = asset('/textures/landmask.png')) => {
+  const img = new Image()
+  img.src = src
+  await img.decode()
+  const c = document.createElement('canvas')
+  c.width = img.width
+  c.height = img.height
+  const ctx = c.getContext('2d', { willReadFrequently: true })!
+  ctx.drawImage(img, 0, 0)
+  const { data, width, height } = ctx.getImageData(0, 0, c.width, c.height)
+  const land = (lat: number, lon: number) => {
+    const l = ((((lon + 180) % 360) + 360) % 360) - 180
+    const u = Math.min(width - 1, Math.floor(((l + 180) / 360) * width))
+    const v = Math.min(height - 1, Math.max(0, Math.floor(((90 - lat) / 180) * height)))
+    return data[(v * width + u) * 4]! > 127
+  }
+  const pos: number[] = []
+  const flag: number[] = []
+  const golden = Math.PI * (3 - Math.sqrt(5))
+  for (let i = 0; i < n; i++) {
+    const lat = 90 - (Math.acos(1 - (2 * (i + 0.5)) / n) * 180) / Math.PI
+    const lon = (((i * golden * 180) / Math.PI) % 360) - 180
+    const on = land(lat, lon)
+    if (!on && i % 3) continue
+    pos.push(...latLonToVec(lat, lon, radius * 1.01))
+    flag.push(on ? 1 : 0)
+  }
+  const g = new THREE.BufferGeometry()
+  g.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3))
+  g.setAttribute('aLand', new THREE.Float32BufferAttribute(flag, 1))
+  g.setAttribute('aRnd', new THREE.Float32BufferAttribute(flag.map(() => Math.random()), 1))
+  g.boundingSphere = new THREE.Sphere(new THREE.Vector3(), radius * 3)
+  return g
 }
 
 const cssFont = (v: string) => getComputedStyle(document.documentElement).getPropertyValue(v).trim() || 'sans-serif'
