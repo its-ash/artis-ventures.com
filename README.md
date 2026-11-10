@@ -24,7 +24,6 @@ make build         # static export into docs/ (GitHub Pages)
 All text is in `content/site.ts`. It comes word for word from the 2026 company profile. Comments show the page (`// p3`). Items marked `// brief` come from the project brief, not the profile.
 
 Open items for the client:
-- Leadership photos: set `photo` per person (file in `public/`). Until then the card shows initials.
 - LinkedIn URLs: set `linkedin` per person. The link shows only when a URL is set.
 - Copy for `/affiliate-program` (Opportunities) and `/privacy-statement`.
 

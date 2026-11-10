@@ -331,7 +331,7 @@ export const leadership = {
         "Founder & CEO of Artis Ventures LLC-FZ and Artis Global Advisory Limited, with 25+ years of global financial-markets experience — the strategic force behind the Group's turnkey brokerage and financial-services vision across Dubai, London and Mauritius.",
         'Expertise across Equities, Commodities, Forex, NDFs, CFDs and Exchange-Traded Derivatives on CME, NYMEX, LME and SGX, with CMA (UAE), FCA (UK) and FSC (Mauritius) licensing depth.',
       ],
-      photo: null,
+      photo: '/photo/nilesh-joshi.jpg',
       linkedin: null, // TODO: client to supply URL
     },
     {
@@ -341,7 +341,7 @@ export const leadership = {
         'A strategic entrepreneurial leader with nearly 30 years of global experience across financial markets, fintech, payments, blockchain and digital assets — bridging traditional finance with next-generation infrastructure including crypto, DeFi, Web3, tokenization and cross-border payments.',
         'Founder of VK Advisory Group, advising brokers, fintechs, PSPs and digital-asset firms on licensing, structuring, go-to-market strategy, partnerships and international expansion across Asia, the GCC and other high-growth markets.',
       ],
-      photo: null,
+      photo: '/photo/vishal-kapoor.jpg',
       linkedin: null, // TODO: client to supply URL
     },
     {
@@ -351,7 +351,7 @@ export const leadership = {
         'A seasoned Business Analyst with 30 years across industries, specialising in Business Planning, Market Research, Demand & Supply Chain management and Financial Feasibility — spanning Manufacturing, Services and Technology across 15 countries.',
         'Retainer consultant to esteemed global firms and founder of a boutique consultancy supporting numerous start-ups and MSMEs with tailored business plans.',
       ],
-      photo: null,
+      photo: '/photo/nawaz-ahmed.jpg',
       linkedin: null, // TODO: client to supply URL
     },
   ] satisfies Leader[],
