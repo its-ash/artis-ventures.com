@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react'
 import { usePathname } from 'next/navigation'
+import { Menu as MenuIcon, X } from 'lucide-react'
 import { Logo } from '@/components/brand/Logo'
 import { useActiveSection } from '@/components/useActiveSection'
 import { nav, sections, ui } from '@/content/site'
@@ -60,12 +61,12 @@ export function Header() {
       <header
         data-header
         data-tone={t}
-        className={`fixed inset-x-0 top-0 z-50 text-fg transition-[transform,background-color] duration-500 ease-(--ease-out) ${top || open ? 'bg-transparent' : 'bg-[color-mix(in_srgb,var(--bg)_90%,transparent)]'}`}
+        className={`fixed inset-x-0 top-0 z-50 pt-[env(safe-area-inset-top)] text-fg transition-[transform,background-color] duration-500 ease-(--ease-out) ${top || open ? 'bg-transparent' : 'bg-[color-mix(in_srgb,var(--bg)_92%,transparent)] backdrop-blur-md'}`}
         style={{ transform: hidden && !open ? 'translateY(-100%)' : 'none' }}
         onFocusCapture={() => setHidden(false)}
       >
-        <div className="shell flex h-(--header-h) items-center justify-between gap-6">
-          <a href={home ? '#hero' : asset('/')} className="block w-28 shrink-0 text-accent md:w-32">
+        <div className="shell flex h-(--header-h) items-center justify-between gap-4 sm:gap-6">
+          <a href={home ? '#hero' : asset('/')} className="inline-flex min-h-11 w-28 shrink-0 items-center text-accent md:w-32">
             <Logo className="h-auto w-full" />
           </a>
           <nav aria-label={ui.primaryNav} className="hidden lg:block">
@@ -86,12 +87,13 @@ export function Header() {
             <button
               ref={btn}
               type="button"
-              className="label inline-flex min-h-11 items-center px-2 lg:hidden"
+              className="label hair inline-flex min-h-11 min-w-11 cursor-pointer items-center justify-center gap-2 rounded-full border bg-[color-mix(in_srgb,var(--bg)_72%,transparent)] px-3.5 backdrop-blur-md transition-colors active:scale-[0.97] lg:hidden"
               aria-expanded={open}
               aria-controls="mobile-nav"
               onClick={() => setOpen((o) => !o)}
             >
-              {open ? ui.close : ui.menu}
+              {open ? <X className="h-4 w-4 text-accent" strokeWidth={1.75} aria-hidden="true" /> : <MenuIcon className="h-4 w-4 text-accent" strokeWidth={1.75} aria-hidden="true" />}
+              <span>{open ? ui.close : ui.menu}</span>
             </button>
           </div>
         </div>
@@ -115,24 +117,31 @@ export function Header() {
         aria-label={ui.primaryNav}
         data-tone="dark"
         hidden={!open}
-        className="tone fixed inset-0 z-40 overflow-y-auto pt-(--header-h) lg:hidden"
+        className="tone fixed inset-0 z-40 overflow-y-auto pt-[calc(var(--header-h)+env(safe-area-inset-top))] lg:hidden"
       >
-        <nav aria-label={ui.primaryNav} className="shell flex min-h-full flex-col justify-between gap-12 py-10">
-          <ul className="flex flex-col gap-2">
+        <nav
+          aria-label={ui.primaryNav}
+          className="shell flex min-h-full flex-col justify-between gap-10 pb-[calc(2rem+env(safe-area-inset-bottom))] pt-6"
+        >
+          <ul className="flex flex-col gap-1">
             {nav.map((n, i) => (
               <li key={n.href} className="hair border-b">
                 <a
                   href={href(n.href)}
                   onClick={() => setOpen(false)}
-                  className="display h-md flex items-baseline gap-4 py-4"
+                  className="display h-md flex min-h-14 items-center gap-4 py-3.5 transition-colors active:text-accent"
                 >
-                  <span className="label text-accent">{pad(i + 1)}</span>
-                  {n.label}
+                  <span className="label tabular-nums text-accent">{pad(i + 1)}</span>
+                  <span>{n.label}</span>
                 </a>
               </li>
             ))}
           </ul>
-          <a href={href('#contact')} onClick={() => setOpen(false)} className="btn-outline label self-start">
+          <a
+            href={href('#contact')}
+            onClick={() => setOpen(false)}
+            className="btn-outline label min-h-12 w-full justify-center sm:w-auto sm:self-start"
+          >
             {ui.cta}
           </a>
         </nav>

@@ -17,9 +17,9 @@ export function CopyEmail({ email }: { email: string }) {
   }
 
   return (
-    <button type="button" onClick={copy} className="group text-left" aria-label={`${email}. ${ui.copy}`}>
+    <button type="button" onClick={copy} className="group min-h-11 py-1 text-left" aria-label={`${email}. ${ui.copy}`}>
       <span className="display h-md link-u break-all">{email}</span>
-      <span className="label mt-2 block text-muted" aria-live="polite">
+      <span className="label mt-1.5 block text-muted" aria-live="polite">
         {done ? ui.copied : ui.copy}
       </span>
     </button>

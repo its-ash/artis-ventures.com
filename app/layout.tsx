@@ -33,6 +33,7 @@ export const metadata: Metadata = {
 export const viewport: Viewport = {
   themeColor: '#0c0e11',
   colorScheme: 'dark light',
+  viewportFit: 'cover',
 }
 
 const place = (o: (typeof offices.items)[number]) => ({

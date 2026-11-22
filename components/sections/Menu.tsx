@@ -17,24 +17,24 @@ export function Menu() {
   const m = meta('menu')
   return (
     <section id="menu" data-tone="light" data-section="menu" aria-labelledby="menu-title" className="tone">
-      <div className="shell py-28 md:py-36">
-        <div className="grid-12 gap-y-8">
+      <div className="shell py-16 md:py-36">
+        <div className="grid-12 gap-y-6 md:gap-y-8">
           <Label n={m.n} className="col-span-12 md:col-span-3">
             {menu.label}
           </Label>
           <div className="col-span-12 md:col-span-9">
             <SplitHeadline id="menu-title" text={menu.headline} className="h-lg max-w-[20ch]" />
-            <p className="prose-w mt-8 text-muted" data-reveal>
+            <p className="prose-w mt-6 text-muted md:mt-8" data-reveal>
               {menu.intro}
             </p>
           </div>
         </div>
 
-        <div className="mt-20 grid grid-cols-1 gap-5 md:mt-28 md:grid-cols-12">
+        <div className="mt-12 grid grid-cols-1 gap-4 md:mt-28 md:grid-cols-12 md:gap-5">
           {menu.groups.map((g, i) => (
             <article
               key={g.title}
-              className={`hair group relative flex flex-col gap-10 rounded-2xl border bg-stone-50/80 p-6 md:p-10 ${SPANS[i % SPANS.length]}`}
+              className={`hair group relative flex flex-col gap-7 rounded-2xl border bg-stone-50/80 p-5 md:gap-10 md:p-10 ${SPANS[i % SPANS.length]}`}
               data-reveal
             >
               {CORNERS.map((c) => (

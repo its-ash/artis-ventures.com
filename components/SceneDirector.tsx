@@ -10,6 +10,9 @@ import type Lenis from 'lenis'
 import { keyframes as K } from '@/scene/keyframes'
 import { flux, targets, useScene } from '@/scene/store'
 import { layout } from '@/scene/view'
+import { approachJump, useApproachStore } from '@/components/sections/ApproachStage'
+import { glanceJump, useGlanceStore } from '@/components/sections/GlanceMotion'
+import { reachJump, useReachStore } from '@/components/sections/ReachStage'
 
 gsap.registerPlugin(ScrollTrigger, SplitText, ScrambleTextPlugin, useGSAP)
 // Mobile URL-bar show/hide must not re-measure every trigger.
@@ -205,49 +208,32 @@ function storyDom() {
     )
 }
 
-// Stack items into one grid cell; only the first shows. Opacity only (not visibility),
-// so screen readers still read every item.
-const stack = (list: HTMLElement, items: HTMLElement[]) => {
-  gsap.set(list, { display: 'grid' })
-  gsap.set(items, { gridArea: '1 / 1' })
-  gsap.set(items.slice(1), { opacity: 0 })
-}
-
-// At a glance (pinned): the label beside each particle numeral swaps; counter syncs.
+// At a glance (pinned): drives the monumental animated metrics stage & interactive chapter jump.
 function glanceDom() {
   const stage = q('[data-glance-stage]')
-  const list = q('[data-stats]')
-  const items = qa('[data-stat]')
-  const count = q('[data-glance-count]')
-  if (!stage || !list || !items.length) return null
+  if (!stage) return null
   const G = K.glance
-  const n = items.length
-  stack(list, items)
-  gsap.set('[data-stat-num]', { autoAlpha: 0 })
-  const shown = (p: number) => G.morphs.slice(1).filter((m) => p >= m + G.morphLen / 2).length
-  const tl = gsap.timeline({
-    defaults: { ease: 'none', immediateRender: false },
-    scrollTrigger: {
-      trigger: stage,
-      start: 'top top',
-      end: `+=${layout().pin(G.pin) * 100}%`,
-      pin: true,
-      scrub: true,
-      onUpdate: (st) => count && (count.textContent = `[${pad(shown(st.progress) + 1)}/${pad(n)}]`),
+  const n = 4
+  const st = ScrollTrigger.create({
+    trigger: stage,
+    start: 'top top',
+    end: `+=${layout().pin(G.pin) * 100}%`,
+    pin: true,
+    scrub: true,
+    anticipatePin: 1,
+    onUpdate: (self) => {
+      const idx = Math.min(n - 1, Math.round(self.progress * (n - 1)))
+      useGlanceStore.setState((prev) =>
+        prev.index === idx && Math.abs(prev.progress - self.progress) < 0.005 ? prev : { index: idx, progress: self.progress },
+      )
     },
   })
-  for (let k = 1; k < n; k++) {
-    const p = G.morphs[k]! + G.morphLen / 2
-    // Outgoing label drifts up while the next drifts in: an overlapping cross-fade, not a cut.
-    tl.fromTo(items[k - 1]!, { opacity: 1, y: 0 }, { opacity: 0, y: -40, duration: 0.08, ease: 'power1.in' }, p - 0.06).fromTo(
-      items[k]!,
-      { opacity: 0, y: 40 },
-      { opacity: 1, y: 0, duration: 0.08, ease: 'power1.out' },
-      p - 0.02,
-    )
+  glanceJump.to = (i: number) => {
+    const y = st.start + (st.end - st.start) * (i / (n - 1))
+    if (lenis) lenis.scrollTo(y, { duration: 0.9, easing: (t: number) => 1 - Math.pow(1 - t, 3) })
+    else window.scrollTo({ top: y, behavior: 'smooth' })
   }
-  tl.set({}, {}, 1)
-  return tl.scrollTrigger ?? null
+  return st
 }
 
 // Capabilities (desktop): cards translate horizontally while pinned; progress bar + counter.
@@ -322,90 +308,76 @@ function menuDom() {
   return () => gsap.ticker.remove(tick)
 }
 
-// Approach (pinned): desktop shows all steps, active 100% and others 20%, and snaps to steps.
-// Mobile stacks the steps so only the active one shows, keeping the pinned block within the viewport.
+// Approach (desktop pinned): updates the interactive ApproachStage store in sync with scroll & 3D orb.
+// Mobile stays unpinned so touch users tap stage pills naturally without scroll trapping.
 function approachDom(desktop: boolean) {
   const stepper = q('[data-stepper]')
-  const steps = qa('[data-step]')
-  if (!stepper || !steps.length) return { pin: null, off: () => {} }
-  const n = steps.length
-  const [off, on] = desktop ? [{ opacity: 0.2 }, { opacity: 1 }] : [{ opacity: 0 }, { opacity: 1 }]
-  if (desktop) gsap.set(steps.slice(1), off)
-  else stack(stepper, steps)
-  const tl = gsap.timeline({
-    defaults: { ease: 'none', immediateRender: false },
-    scrollTrigger: { trigger: stepper, start: 'center center', end: `+=${layout().pin(K.approach.pin) * 100}%`, pin: true, scrub: true },
+  if (!stepper || !desktop) return { pin: null, off: () => {} }
+  const n = 5
+  const st = ScrollTrigger.create({
+    trigger: stepper,
+    start: 'center center',
+    end: `+=${layout().pin(K.approach.pin) * 100}%`,
+    pin: true,
+    scrub: true,
+    anticipatePin: 1,
+    onUpdate: (self) => {
+      const idx = Math.min(n - 1, Math.round(self.progress * (n - 1)))
+      useApproachStore.setState((prev) =>
+        prev.index === idx && Math.abs(prev.progress - self.progress) < 0.005 ? prev : { index: idx, progress: self.progress },
+      )
+    },
   })
-  for (let k = 1; k < n; k++) {
-    const p = (k - 0.5) / (n - 1)
-    tl.fromTo(steps[k - 1]!, on, { ...off, duration: 0.1, ease: 'power1.inOut' }, p - 0.05).fromTo(
-      steps[k]!,
-      off,
-      { ...on, duration: 0.1, ease: 'power1.inOut' },
-      p - 0.05,
-    )
-  }
-  tl.set({}, {}, 1)
-  const st = tl.scrollTrigger ?? null
-  if (!desktop || !st) return { pin: st, off: () => {} }
-  // Gentle settle: only when the user stops near a step, never a yank from mid-way.
-  const snap = () => {
-    if (!st.isActive) return
-    const goal = Math.round(st.progress * (n - 1)) / (n - 1)
-    const gap = Math.abs(goal - st.progress)
-    if (gap < 0.005 || gap > 0.35 / (n - 1)) return
-    const y = st.start + (st.end - st.start) * goal
-    if (lenis) lenis.scrollTo(y, { duration: 1.1, easing: (t: number) => 1 - Math.pow(1 - t, 3) })
+  approachJump.to = (i: number) => {
+    const y = st.start + (st.end - st.start) * (i / (n - 1))
+    if (lenis) lenis.scrollTo(y, { duration: 0.9, easing: (t: number) => 1 - Math.pow(1 - t, 3) })
     else window.scrollTo({ top: y, behavior: 'smooth' })
   }
-  ScrollTrigger.addEventListener('scrollEnd', snap)
-  return { pin: st, off: () => ScrollTrigger.removeEventListener('scrollEnd', snap) }
+  return {
+    pin: st,
+    off: () => {
+      approachJump.to = undefined
+    },
+  }
 }
 
-// Reach (pinned): CMA / FCA / FSC, then the two offices, swap one at a time while the globe turns to each stop.
-function reachDom() {
+// Reach (desktop pinned): syncs the interactive ReachStage jurisdiction console 1:1 with the 3D DotGlobe stops.
+function reachDom(desktop: boolean) {
   const stage = q('[data-reach-stage]')
-  const box = q('[data-stops]')
-  const groups = qa('[data-stop-group]')
-  const items = qa('[data-stop]')
-  if (!stage || !box || !groups.length || !items.length) return null
-  const n = items.length
-  // Groups (regulators, offices) share one cell; inside each group its stops share one cell.
-  stack(box, groups)
-  for (const g of groups) {
-    const list = g.querySelector<HTMLElement>('[data-stop-list]')
-    if (list) stack(list, gsap.utils.toArray<HTMLElement>('[data-stop]', g))
-  }
-  const groupOf = (el: HTMLElement) => el.closest<HTMLElement>('[data-stop-group]')
-  const tl = gsap.timeline({
-    defaults: { ease: 'none', immediateRender: false },
-    scrollTrigger: { trigger: stage, start: 'top top', end: `+=${layout().pin(K.reach.pin) * 100}%`, pin: true, scrub: true },
+  if (!stage || !desktop) return null
+  const n = K.reach.stops.length
+  const st = ScrollTrigger.create({
+    trigger: stage,
+    start: 'top top',
+    end: `+=${layout().pin(K.reach.pin) * 100}%`,
+    pin: true,
+    scrub: true,
+    anticipatePin: 1,
+    onUpdate: (self) => {
+      const idx = Math.min(n - 1, Math.round(self.progress * (n - 1)))
+      useReachStore.setState((prev) =>
+        prev.index === idx && Math.abs(prev.progress - self.progress) < 0.005 ? prev : { index: idx, progress: self.progress },
+      )
+    },
   })
-  for (let k = 1; k < n; k++) {
-    const [a, b] = [items[k - 1]!, items[k]!]
-    const [ga, gb] = [groupOf(a), groupOf(b)]
-    tl.fromTo(a, { opacity: 1, yPercent: 0 }, { opacity: 0, yPercent: -12, duration: 0.05 }, k / n - 0.04).fromTo(
-      b,
-      { opacity: 0, yPercent: 12 },
-      { opacity: 1, yPercent: 0, duration: 0.05 },
-      k / n,
-    )
-    // Crossing from regulators to offices: the group (label, caption) swaps with the stop.
-    if (ga && gb && ga !== gb)
-      tl.fromTo(ga, { opacity: 1 }, { opacity: 0, duration: 0.05 }, k / n - 0.04).fromTo(gb, { opacity: 0 }, { opacity: 1, duration: 0.05 }, k / n)
+  reachJump.to = (i: number) => {
+    const y = st.start + (st.end - st.start) * (i / (n - 1))
+    if (lenis) lenis.scrollTo(y, { duration: 0.9, easing: (t: number) => 1 - Math.pow(1 - t, 3) })
+    else window.scrollTo({ top: y, behavior: 'smooth' })
   }
-  tl.set({}, {}, 1)
-  return tl.scrollTrigger ?? null
+  return st
 }
 
-// Leadership: photo clip-path bottom-up with inner scale 1.12 → 1; names rise by line.
-function leadershipDom() {
-  for (const box of qa('[data-leader-photo]')) {
-    const inner = box.firstElementChild
-    const tl = gsap.timeline({ paused: true })
-    tl.fromTo(box, { clipPath: 'inset(100% 0% 0% 0%)' }, { clipPath: 'inset(0% 0% 0% 0%)', duration: 1.2, ease: 'power4.inOut' })
-    if (inner) tl.fromTo(inner, { scale: 1.12 }, { scale: 1, duration: 1.6, ease: 'power3.out' }, 0)
-    playOnce(box, early('top 80%'), tl)
+// Leadership: desktop uses clip-path wipe + inner scale; mobile shows portraits cleanly with subtle fade so fast touch scrolls never catch half-clipped heads.
+function leadershipDom(desktop: boolean) {
+  if (desktop) {
+    for (const box of qa('[data-leader-photo]')) {
+      const inner = box.firstElementChild
+      const tl = gsap.timeline({ paused: true })
+      tl.fromTo(box, { clipPath: 'inset(100% 0% 0% 0%)' }, { clipPath: 'inset(0% 0% 0% 0%)', duration: 1.2, ease: 'power4.inOut' })
+      if (inner) tl.fromTo(inner, { scale: 1.12 }, { scale: 1, duration: 1.6, ease: 'power3.out' }, 0)
+      playOnce(box, early('top 80%'), tl)
+    }
   }
   for (const h of qa('[data-leader-name]'))
     SplitText.create(h, {
@@ -532,12 +504,12 @@ export function SceneDirector() {
           // Pins in page order, then everything else.
           const hero = gl ? heroDom() : null
           storyDom()
-          const glance = gl ? glanceDom() : null
+          const glance = desktop ? glanceDom() : null
           const track = desktop ? trackDom() : null
           const menuOff = menuDom()
           const approach = approachDom(desktop)
-          const reach = gl ? reachDom() : null
-          leadershipDom()
+          const reach = gl ? reachDom(desktop) : null
+          leadershipDom(desktop)
           // With WebGL the footer word is a 3D scene of its own (FooterWordmark).
           const footerOff = gl ? () => {} : footerDom()
           labelDom()
@@ -545,6 +517,8 @@ export function SceneDirector() {
           const trackOff =
             scenery && hero ? scenery.sceneTrack(scenery.buildScene({ hero, glance, track, approach: approach.pin, reach })) : () => {}
           return () => {
+            glanceJump.to = undefined
+            reachJump.to = undefined
             menuOff()
             footerOff()
             fluxOff()

@@ -111,15 +111,15 @@ export const keyframes = {
     range: ['top bottom', 'top 20%'],
   },
 
-  // Below 1024px: objects sit above the text column, pins are shorter.
+  // Below 1024px: objects sit cleanly in the upper atmospheric frame above text, pins are shorter.
   mobile: {
-    heroPin: 1.6,
+    heroPin: 1.35,
     pinScale: 0.6, // glance, approach, reach
-    story: { x: 0, y: 0.32, scale: 0.42 },
-    numeral: { x: 0, y: 0.36, scale: 0.42 },
-    row: { x: 0, y: 0.5, scale: 0.34 },
-    globe: { x: 0, y: 0.34, scale: 0.6 },
-    contact: { x: 0, y: 0.5, scale: 0.42 },
+    story: { x: 0, y: 0.82, scale: 0.22 },
+    numeral: { x: 0, y: 0.56, scale: 0.34 },
+    row: { x: 0, y: 0.82, scale: 0.19 },
+    globe: { x: 0, y: 0.42, scale: 0.5 },
+    contact: { x: 0, y: 0.82, scale: 0.22 },
   },
 
   // Footer wordmark: a glyph sheet that dissolves in along a glowing front, rolls on a slow wave and stands up

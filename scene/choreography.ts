@@ -111,9 +111,7 @@ export function buildScene(p: Pins): Segment[] {
     })
   })
 
-  // 4 · At a glance (approach): strokes regroup, dissolve into particles, arch → 100+.
-  const N = Lay.numeral
-  const numeral = { x: vx(N.x), y: vy(N.y), scale: N.scale }
+  // 4 · At a glance (approach): Story arch and shards cleanly exit before #glance arrives so the stage is spotless.
   add(glanceIn, (tl, s, L) => {
     pillars.forEach((el, i) => {
       const d = dock(el, s)
@@ -121,37 +119,17 @@ export function buildScene(p: Pins): Segment[] {
       tl.fromTo(
         t.shards.s[i]!,
         { x: d.x, y: d.y, z: 0.6, rx: 0, ry: 0, rz: 0, scale: dockScale },
-        { x: rest.x, y: rest.y, z: 0, scale: 1, duration: L * 0.35, ease: 'power2.inOut' },
+        { x: rest.x, y: rest.y, z: 0, scale: 1, duration: L * 0.25, ease: 'power2.inOut' },
         s,
       )
     })
-    tl.fromTo(t.object, { x: vx(E.x), y: vy(E.y), scale: E.scale, ry: 0 }, { x: numeral.x, y: numeral.y, scale: 0.8, duration: L * 0.35, ease: 'power2.inOut' }, s)
-      .set(t.particles, { x: numeral.x, y: numeral.y, z: 0, rx: 0, ry: 0, rz: 0, scale: 0.8, morph: 0 }, at(s, L, 0.35))
-      .fromTo(t.shards, { opacity: 1 }, { opacity: 0, duration: L * 0.1 }, at(s, L, 0.36))
-      .fromTo(t.particles, { opacity: 0 }, { opacity: 1, duration: L * 0.1 }, at(s, L, 0.36))
-      .fromTo(t.particles, { morph: 0, scale: 0.8 }, { morph: 1, scale: N.scale, duration: L * 0.5, ease: 'power2.inOut' }, at(s, L, 0.48))
-      .fromTo(t.particles, { light: 0 }, { light: 1, duration: L * 0.5 }, at(s, L, 0.25))
-      .fromTo(t.video, { opacity: S.video.opacity }, { opacity: 0, duration: L * 0.6 }, s)
+    tl.to(t.object, { opacity: 0, duration: L * 0.15 }, s)
+      .fromTo(t.shards, { opacity: 1 }, { opacity: 0, duration: L * 0.25 }, s)
+      .set(t.object, { opacity: 0 }, at(s, L, 0.25))
+      .set(t.shards, { opacity: 0 }, at(s, L, 0.25))
+      .set(t.particles, { opacity: 0, morph: 5 }, s)
+      .fromTo(t.video, { opacity: S.video.opacity }, { opacity: 0, duration: L * 0.4 }, s)
   })
-
-  // 5 · At a glance (pinned): 100+ → 40+ → 15+ → 3.
-  if (p.glance)
-    add(p.glance, (tl, s, L) => {
-      for (let k = 1; k < K.glance.morphs.length; k++)
-        tl.fromTo(t.particles, { morph: k }, { morph: k + 1, duration: L * K.glance.morphLen, ease: 'power1.inOut' }, at(s, L, K.glance.morphs[k]!))
-    })
-
-  // 6 · At a glance (out): the last numeral (3) dissolves as soon as its pin releases, within 30vh of
-  // scroll, so it never stays on screen while the rest of the section and Capabilities scroll in.
-  const G = p.glance
-  const glanceOut = G
-    ? range({ start: () => G.end, end: () => G.end + innerHeight * 0.3 })
-    : range({ trigger: '#glance', start: 'bottom bottom', end: 'bottom 70%' })
-  add(glanceOut, (tl, s, L) =>
-    tl
-      .fromTo(t.particles, { morph: 4 }, { morph: 5, duration: L, ease: 'power1.in' }, s)
-      .fromTo(t.particles, { opacity: 1 }, { opacity: 0, duration: L * 0.5 }, at(s, L, 0.5)),
-  )
 
   // 7 · Capabilities (approach): the four blocks fade up in their row.
   const R = Lay.row
@@ -181,24 +159,23 @@ export function buildScene(p: Pins): Segment[] {
     tl.fromTo(t.blocks, { scale: R.scale, opacity: 1 }, { scale: R.scale * M.scale, opacity: M.opacity, duration: L }, s),
   )
 
-  // 9 · Approach (in): blocks fly to the path nodes; the camera joins the curve.
+  // 9 · Approach (in): blocks fade cleanly away; the spectral waveform sculpture rises in sync with scroll.
   const apIn = range({ trigger: '#approach', start: 'top bottom', endTrigger: '[data-stepper]', end: 'center center' })
   add(apIn, (tl, s, L) =>
     tl
-      .fromTo(t.blocks, { toPath: 0, opacity: M.opacity }, { toPath: 1, opacity: 1, duration: L * 0.75, ease: 'power2.inOut' }, s)
-      .fromTo(t.path, { opacity: 0, draw: 0, follow: 0 }, { opacity: 1, follow: 1, duration: L * 0.6, ease: 'power2.inOut' }, at(s, L, 0.4))
+      .fromTo(t.blocks, { opacity: M.opacity }, { opacity: 0, duration: L * 0.45, ease: 'power2.out' }, s)
+      .fromTo(t.path, { opacity: 0, draw: 0, follow: 0 }, { opacity: 1, follow: 1, duration: L * 0.78, ease: 'power2.inOut' }, at(s, L, 0.12))
       .fromTo(t.video2, { opacity: 0 }, { opacity: K.approach.video, duration: L * 0.5 }, s),
   )
 
-  // 10 · Approach (pinned): the tube draws and the camera rides it.
-  if (p.approach) add(p.approach, (tl, s, L) => tl.fromTo(t.path, { draw: 0 }, { draw: 1, duration: L }, s))
+  // 10 · Approach (pinned): exact 1:1 scroll-locked spectral waveform sweep across all 5 steps (01/05 → 05/05).
+  if (p.approach) add(p.approach, (tl, s, L) => tl.fromTo(t.path, { draw: 0 }, { draw: 1, duration: L, ease: 'none' }, s))
 
-  // 11 · Approach (out): camera returns to the stage view.
+  // 11 · Approach (out): waveform fades cleanly out as the camera returns to the stage view for Reach.
   add(range({ trigger: '#reach', start: 'top bottom', end: 'top 30%' }), (tl, s, L) =>
     tl
       .fromTo(t.path, { opacity: 1, follow: 1, draw: 1 }, { opacity: 0, follow: 0, duration: L, ease: 'power2.inOut' }, s)
-      .fromTo(t.video2, { opacity: K.approach.video }, { opacity: 0, duration: L * 0.6 }, s)
-      .fromTo(t.blocks, { opacity: 1 }, { opacity: 0.35, duration: L }, s),
+      .fromTo(t.video2, { opacity: K.approach.video }, { opacity: 0, duration: L * 0.6 }, s),
   )
 
   // 12 · Reach (in): nodes fly into the globe centre as the land dots bloom.
@@ -206,12 +183,10 @@ export function buildScene(p: Pins): Segment[] {
   const globe = { x: vx(Gl.x), y: vy(Gl.y) }
   const stops = K.reach.stops
   const rot0 = stopRotation(stops[0]!)
-  let last = rot0
   add(range({ trigger: '[data-reach-stage]', start: 'top bottom', end: 'top top' }), (tl, s, L) =>
     tl
       .set(t.particles, { ...globe, z: 0, rx: rot0.rx, ry: rot0.ry, rz: 0, scale: Gl.scale, morph: 5, light: 0 }, s)
-      .set(t.blocks, { gx: globe.x, gy: globe.y }, s)
-      .fromTo(t.blocks, { collapse: 0, opacity: 0.35 }, { collapse: 1, opacity: 0, duration: L * 0.55, ease: 'power2.in' }, s)
+      .set(t.blocks, { gx: globe.x, gy: globe.y, opacity: 0 }, s)
       .fromTo(t.particles, { opacity: 0 }, { opacity: 1, duration: L * 0.3 }, at(s, L, 0.25))
       .fromTo(t.particles, { morph: 5 }, { morph: 6, duration: L * 0.65, ease: 'power2.out' }, at(s, L, 0.25))
       .fromTo(t.globe, { opacity: 0, pins: 0, arcs: 0 }, { opacity: 1, duration: L * 0.4 }, at(s, L, 0.55))
@@ -237,14 +212,18 @@ export function buildScene(p: Pins): Segment[] {
         if (!isHub(stops[k]!)) tl.fromTo(t.globe, { arcs }, { arcs: ++arcs, duration: L * 0.1 }, at(s, L, k / n))
         prev = next
       }
-      last = prev
     })
 
-  // 14 · Leadership: canvas fades out; rendering pauses while hidden.
+  // 14 · Leadership: globe, particles, and canvas fade completely out so Leadership stays spotless through Nawaz Ahmed.
   const [ls, le] = K.leadership.range
-  add(range({ trigger: '#leadership', start: ls, end: le }), (tl, s, L) => tl.fromTo(t.canvas, { opacity: 1 }, { opacity: 0, duration: L }, s))
+  add(range({ trigger: '#leadership', start: ls, end: le }), (tl, s, L) =>
+    tl
+      .fromTo(t.canvas, { opacity: 1 }, { opacity: 0, duration: L }, s)
+      .fromTo(t.globe, { opacity: 1 }, { opacity: 0, duration: L * 0.5 }, s)
+      .fromTo(t.particles, { opacity: 1 }, { opacity: 0, duration: L * 0.5 }, s),
+  )
 
-  // 15 · Contact: globe dots reassemble into the arch on the left half; portal shows contact_city.
+  // 15 · Contact: dark tone arrives before the Contact arch fades cleanly in place (no globe drifting across Nawaz Ahmed).
   const C = K.contact
   const conR = range({
     trigger: '#contact',
@@ -257,18 +236,17 @@ export function buildScene(p: Pins): Segment[] {
     const z = C.camera.z
     const a = Lay.contact
     const pose = { x: vx(a.x, z), y: vy(a.y, z), z: 0, rx: 0, ry: 0, rz: 0, scale: a.scale }
-    tl.set(t.object, { ...pose, opacity: 0, fill: 1, wire: 1, idle: 0 }, s)
-      .fromTo(t.canvas, { opacity: 0 }, { opacity: 1, duration: L * 0.3 }, s)
-      .fromTo(t.camera, { ...cam }, { ...cam, z, duration: L, ease: 'power2.inOut' }, s)
-      .fromTo(t.globe, { opacity: 1 }, { opacity: 0, duration: L * 0.3 }, s)
+    tl.set(t.globe, { opacity: 0, pins: 0, arcs: 0 }, s)
+      .set(t.particles, { opacity: 0 }, s)
+      .set(t.object, { ...pose, opacity: 0, fill: 1, wire: 1, idle: 1 }, s)
+      .fromTo(t.camera, { ...cam }, { ...cam, z, duration: L * 0.55, ease: 'power2.inOut' }, at(s, L, 0.45))
+      .fromTo(t.canvas, { opacity: 0 }, { opacity: 1, duration: L * 0.45, ease: 'power2.out' }, at(s, L, 0.48))
       .fromTo(
-        t.particles,
-        { ...globe, z: 0, rx: last.rx, ry: last.ry, rz: 0, scale: Gl.scale, morph: 6 },
-        { ...pose, morph: 7, duration: L * 0.75, ease: 'power2.inOut' },
-        s,
+        t.object,
+        { opacity: 0, scale: a.scale * 0.92, idle: 1 },
+        { opacity: 1, scale: a.scale, idle: 1, duration: L * 0.52, ease: 'power2.out' },
+        at(s, L, 0.48),
       )
-      .fromTo(t.particles, { opacity: 1 }, { opacity: 0, duration: L * 0.2 }, at(s, L, 0.8))
-      .fromTo(t.object, { opacity: 0, idle: 0 }, { opacity: 1, idle: 1, duration: L * 0.2 }, at(s, L, 0.8))
   })
 
   // 16 · Footer: the opaque footer covers the stage, so the canvas fades out and rendering pauses.

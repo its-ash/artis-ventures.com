@@ -31,6 +31,7 @@ const server: NextConfig = {
 const config: NextConfig = {
   reactStrictMode: true,
   poweredByHeader: false,
+  allowedDevOrigins: ['192.168.0.127'],
   ...(exporting ? { output: 'export', trailingSlash: true, images: { unoptimized: true } } : server),
 }
 

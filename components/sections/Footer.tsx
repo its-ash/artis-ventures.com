@@ -9,35 +9,35 @@ const summary = offices.items.filter((o) => o.id !== 'london')
 export function Footer() {
   return (
     <footer data-tone="dark" className="tone gridlines relative overflow-hidden">
-      <div className="shell pb-10 pt-24">
-        <div className="grid-12 gap-y-12">
+      <div className="shell pb-8 pt-16 md:pb-10 md:pt-24">
+        <div className="grid-12 gap-y-10 md:gap-y-12">
           <div className="col-span-12 md:col-span-4">
-            <Link href="/" className="block w-40 text-accent">
+            <Link href="/" className="inline-flex min-h-11 w-40 items-center text-accent">
               <Logo className="h-auto w-full" />
             </Link>
-            <p className="prose-w mt-8 text-sm text-muted">{footer.legal}</p>
+            <p className="prose-w mt-5 text-sm text-muted md:mt-8">{footer.legal}</p>
           </div>
-          <nav aria-label={ui.footerNav} className="col-span-6 md:col-span-2 md:col-start-6">
-            <ul className="space-y-3">
+          <nav aria-label={ui.footerNav} className="col-span-12 md:col-span-2 md:col-start-6">
+            <ul className="grid grid-cols-2 gap-x-4 gap-y-1 md:grid-cols-1 md:gap-y-0">
               {nav.map((n) => (
                 <li key={n.href}>
-                  <a href={asset(`/${n.href}`)} className="label hover:text-accent">
+                  <a href={asset(`/${n.href}`)} className="label inline-flex min-h-11 min-w-11 items-center hover:text-accent">
                     {n.label}
                   </a>
                 </li>
               ))}
               <li>
-                <a href={asset(footer.opportunities.href)} className="label hover:text-accent">
+                <a href={asset(footer.opportunities.href)} className="label inline-flex min-h-11 items-center hover:text-accent">
                   {footer.opportunities.label}
                 </a>
               </li>
             </ul>
           </nav>
-          <ul className="col-span-12 grid grid-cols-1 gap-8 sm:grid-cols-3 md:col-span-5 md:col-start-8">
+          <ul className="col-span-12 grid grid-cols-1 gap-7 sm:grid-cols-3 md:col-span-5 md:col-start-8 md:gap-8">
             {summary.map((o) => (
               <li key={o.id}>
                 <p className="label text-accent">{o.label}</p>
-                <address className="mt-3 text-sm not-italic text-muted">
+                <address className="mt-2.5 text-sm not-italic text-muted md:mt-3">
                   {o.lines.map((l) => (
                     <span key={l} className="block">
                       {l}
@@ -48,9 +48,9 @@ export function Footer() {
             ))}
           </ul>
         </div>
-        <div className="hair mt-20 flex flex-wrap items-center justify-between gap-4 border-t pt-6">
+        <div className="hair mt-12 flex flex-wrap items-center justify-between gap-4 border-t pt-4 pb-[env(safe-area-inset-bottom)] md:mt-20 md:pt-6">
           <p className="label text-muted">{footer.copyright}</p>
-          <a href={asset(footer.privacy.href)} className="label link-u text-muted">
+          <a href={asset(footer.privacy.href)} className="label link-u inline-flex min-h-11 items-center text-muted">
             {footer.privacy.label}
           </a>
         </div>

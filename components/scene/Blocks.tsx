@@ -98,19 +98,22 @@ export function Blocks() {
       const node = NODES[i]!
       const onRow = 1 - b.toPath
       const w = clamp01(1 - Math.abs(i - b.active)) * onRow
-      const lit = clamp01((path.draw * (NODES.length - 1) - i) * 6 + 1) * b.toPath
+      const stepFocus = Math.exp(-Math.pow((path.draw * (NODES.length - 1) - i) / 0.52, 2)) * b.toPath
+      const lit = Math.max(stepFocus, clamp01((path.draw * (NODES.length - 1) - i) * 4 + 0.5) * 0.45 * b.toPath)
       const glow = Math.max(w, lit)
       const bob = moving ? Math.sin(time * 0.8 + i * 1.3) * 0.04 * onRow : 0
       const row: [number, number, number] = [b.x + (i - b.active) * b.gap * b.scale, b.y + bob, 0]
       const pos = [0, 1, 2].map((k) => lerp(lerp(row[k]!, node[k]!, b.toPath), k === 0 ? b.gx : k === 1 ? b.gy : 0, b.collapse))
-      const s = lerp(lerp(b.scale * (0.9 + 0.1 * w), K.approach.nodeScale, b.toPath), 0.001, b.collapse)
-      const spin = moving ? time * 0.3 + i : i
-      damp3(it.position, pos as [number, number, number], DAMP, step)
-      damp3(it.scale, [s, s, s], DAMP, step)
+      const nodeS = K.approach.nodeScale * (0.9 + 0.42 * stepFocus)
+      const s = lerp(lerp(b.scale * (0.9 + 0.1 * w), nodeS, b.toPath), 0.001, b.collapse)
+      const spin = path.draw * Math.PI * 1.5 + (moving ? time * 0.25 + i : i)
+      const d = lerp(DAMP, 0.08, b.toPath)
+      damp3(it.position, pos as [number, number, number], d, step)
+      damp3(it.scale, [s, s, s], d, step)
       dampE(
         it.rotation,
-        [lerp(REST.rx * (1 - w), REST.rx * 0.6, b.toPath), lerp(REST.ry * (1 - w), spin, b.toPath), 0],
-        DAMP,
+        [lerp(REST.rx * (1 - w), REST.rx * 0.5 * (1 - stepFocus), b.toPath), lerp(REST.ry * (1 - w), spin, b.toPath), 0],
+        d,
         step,
       )
 

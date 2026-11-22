@@ -27,7 +27,7 @@ const validate = (d: FormData): Errors => {
 }
 
 const input =
-  'mt-2 w-full rounded-xl border border-stone-50/15 bg-graphite-950 px-4 py-3 text-fg outline-none transition-colors placeholder:text-muted hover:border-stone-50/30 focus-visible:border-accent aria-invalid:border-[#ff8a80]'
+  'mt-2 min-h-12 w-full rounded-xl border border-stone-50/15 bg-graphite-950 px-4 py-3 text-[16px] leading-snug text-fg outline-none transition-colors placeholder:text-muted hover:border-stone-50/30 focus-visible:border-accent aria-invalid:border-[#ff8a80]'
 
 export function ContactForm() {
   const uid = useId()
@@ -91,6 +91,7 @@ export function ContactForm() {
       <input
         {...a11y(k)}
         type={type}
+        inputMode={type === 'email' ? 'email' : type === 'tel' ? 'tel' : undefined}
         autoComplete={auto}
         maxLength={MAX.short}
         required={req}
@@ -156,22 +157,26 @@ export function ContactForm() {
       </div>
 
       <div className="col-span-12">
-        <label className="flex cursor-pointer items-start gap-3 text-muted">
+        <label className="flex min-h-11 cursor-pointer items-start gap-3 py-1 text-muted">
           <input
             {...a11y('consent')}
             type="checkbox"
             value="yes"
             required
-            className="mt-1.5 size-4 shrink-0 accent-teal-500"
+            className="mt-1 size-5 shrink-0 accent-teal-500"
             onChange={(e) => onBlur('consent', e.currentTarget.form)}
           />
-          <span>{f.fields.consent}</span>
+          <span className="text-[15px] leading-snug">{f.fields.consent}</span>
         </label>
         {err('consent')}
       </div>
 
-      <div className="col-span-12 flex flex-wrap items-center gap-6">
-        <button type="submit" disabled={status === 'sending'} className="btn-outline label disabled:opacity-50">
+      <div className="col-span-12 flex flex-wrap items-center gap-4 sm:gap-6">
+        <button
+          type="submit"
+          disabled={status === 'sending'}
+          className="btn-outline label min-h-12 w-full justify-center disabled:opacity-50 sm:w-auto"
+        >
           {status === 'sending' ? f.sending : f.submit}
         </button>
         <p role="status" aria-live="polite" className="label text-muted">

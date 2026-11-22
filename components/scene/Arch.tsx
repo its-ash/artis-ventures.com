@@ -3,7 +3,7 @@
 import { Suspense, useEffect, useMemo, useRef } from 'react'
 import * as THREE from 'three'
 import { useFrame, useThree } from '@react-three/fiber'
-import { MeshPortalMaterial, useVideoTexture } from '@react-three/drei'
+import { MeshPortalMaterial } from '@react-three/drei'
 import { damp, damp3, dampE } from 'maath/easing'
 import { buildArch, GLOW, makeGlass } from '@/components/scene/geometry'
 import { asset } from '@/lib/base'
@@ -25,21 +25,75 @@ const makeMaterials = (quality: number) => ({
 })
 
 function PortalVideo({ src }: { src: VideoName }) {
-  const tex = useVideoTexture(asset(`/video/${src}.mp4`), { start: true, muted: true, loop: true, playsInline: true })
   const plane = useRef<THREE.Mesh>(null)
+  const mat = useRef<THREE.MeshBasicMaterial>(null)
   const camera = useThree((s) => s.camera) as THREE.PerspectiveCamera
   const size = useThree((s) => s.size)
+  const gl = useThree((s) => s.gl)
 
   useEffect(() => {
-    const v = tex.image as HTMLVideoElement
-    useScene.setState((s) => ({ portalEl: v, load: { ...s.load, video: true } }))
-    // Reduced motion: keep the first frame, no playback.
-    if (useScene.getState().motion) return
-    const hold = () => v.pause()
-    if (!v.paused) hold()
-    v.addEventListener('playing', hold)
-    return () => v.removeEventListener('playing', hold)
-  }, [tex])
+    // Share the existing hero DOM <video> so portal and stage video are frame-identical with zero handoff cut.
+    const shared = src === 'hero_city' ? document.querySelector<HTMLVideoElement>('[data-stage] video') : null
+    let owned: HTMLVideoElement | null = null
+    const v =
+      shared ??
+      (() => {
+        const el = document.createElement('video')
+        el.src = asset(`/video/${src}.mp4`)
+        el.crossOrigin = 'anonymous'
+        el.loop = true
+        el.muted = true
+        el.defaultMuted = true
+        el.playsInline = true
+        el.preload = 'auto'
+        owned = el
+        return el
+      })()
+
+    v.muted = true
+    v.defaultMuted = true
+    v.playsInline = true
+    v.loop = true
+
+    const vt = new THREE.VideoTexture(v)
+    vt.colorSpace = THREE.SRGBColorSpace
+    vt.minFilter = THREE.LinearFilter
+    vt.magFilter = THREE.LinearFilter
+    vt.generateMipmaps = false
+    vt.anisotropy = Math.min(8, gl.capabilities.getMaxAnisotropy())
+
+    const m = mat.current
+    if (m) {
+      m.map = vt
+      m.needsUpdate = true
+    }
+
+    const markReady = () => useScene.setState((s) => ({ portalEl: v, load: { ...s.load, video: true } }))
+    const motion = useScene.getState().motion
+
+    if (motion) {
+      void v.play().catch(() => {})
+    } else {
+      v.pause()
+    }
+
+    if (v.readyState >= 2) markReady()
+    else v.addEventListener('loadeddata', markReady, { once: true })
+
+    return () => {
+      v.removeEventListener('loadeddata', markReady)
+      if (m) {
+        m.map = null
+        m.needsUpdate = true
+      }
+      vt.dispose()
+      if (owned) {
+        owned.pause()
+        owned.removeAttribute('src')
+        owned.load()
+      }
+    }
+  }, [src, gl])
 
   useFrame(() => {
     const m = plane.current
@@ -57,13 +111,14 @@ function PortalVideo({ src }: { src: VideoName }) {
   return (
     <mesh ref={plane}>
       <planeGeometry />
-      <meshBasicMaterial map={tex} toneMapped={false} />
+      <meshBasicMaterial ref={mat} toneMapped={false} />
     </mesh>
   )
 }
 
 export function Arch() {
   const quality = useScene((s) => s.quality)
+  const mobile = useScene((s) => s.mobile)
   const portal = useScene((s) => s.portal)
   const { geometry, edges, counter } = useMemo(() => buildArch(), [])
   const mats = useMemo(() => makeMaterials(quality), [quality])
@@ -112,11 +167,13 @@ export function Arch() {
       body.current.visible = fill > 0.002
     }
     if (portalMesh.current) portalMesh.current.visible = fill > 0.002
-    // No video decoding while the arch is off-stage.
+    // No video decoding while neither the portal nor the stage video is visible.
     const vid = useScene.getState().portalEl
     if (vid && useScene.getState().motion) {
-      if (fill > 0.002 && vid.paused) void vid.play().catch(() => {})
-      else if (fill <= 0.002 && !vid.paused) vid.pause()
+      const stageVisible = useScene.getState().portal === 'hero_city' && targets().video.opacity >= 0.005
+      const active = fill > 0.002 || stageVisible
+      if (active && vid.paused) void vid.play().catch(() => {})
+      else if (!active && !vid.paused) vid.pause()
     }
 
     // Wire draws with load progress (0–1), then fades to a faint rest as the glass fills in.
@@ -134,7 +191,7 @@ export function Arch() {
       <mesh ref={body} geometry={geometry} material={[mats.glass, mats.metal]} />
       <lineSegments ref={line} geometry={edges} material={mats.wire} />
       <mesh ref={portalMesh} geometry={counter} position-z={FRONT_Z + 0.002}>
-        <MeshPortalMaterial worldUnits blur={0} resolution={512} toneMapped={false}>
+        <MeshPortalMaterial worldUnits blur={0} resolution={mobile ? 512 : 1024} toneMapped={false}>
           <color attach="background" args={['#0c0e11']} />
           <Suspense fallback={null}>
             <PortalVideo src={portal} />

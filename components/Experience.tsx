@@ -46,22 +46,28 @@ function useStageVideo(gl: boolean, motion: boolean) {
     const altVid = alt?.querySelector('video')
     const show = (v: HTMLVideoElement, on: boolean) => (on && motion ? v.paused && v.play().catch(() => {}) : v.pause())
     const stone = document.querySelector<HTMLElement>('[data-stone]')
+    const unlock = () => {
+      if (motion && vid.paused) void vid.play().catch(() => {})
+    }
+    window.addEventListener('touchstart', unlock, { passive: true, once: true })
+    window.addEventListener('pointerdown', unlock, { passive: true, once: true })
     let last = ''
     let lastAlt = -1
     let lastStone = -1
     const tick = () => {
-      const { video: v, video2, stone: st } = targets()
+      const { video: v, video2, stone: st, object: obj } = targets()
       if (stone && Math.abs(st.opacity - lastStone) > 1e-3) {
         lastStone = st.opacity
         stone.style.opacity = String(st.opacity)
       }
-      const key = `${v.opacity.toFixed(3)}|${v.blur.toFixed(1)}|${v.scale.toFixed(3)}`
+      const portalActive = useScene.getState().portal === 'hero_city' && obj.opacity > 0.002 && obj.fill > 0.002
+      const key = `${v.opacity.toFixed(3)}|${v.blur.toFixed(1)}|${v.scale.toFixed(3)}|${portalActive ? 1 : 0}`
       if (key !== last) {
         last = key
         el.style.opacity = String(v.opacity)
         el.style.filter = v.blur > 0.05 ? `blur(${v.blur}px)` : ''
         el.style.transform = v.scale !== 1 ? `scale(${v.scale})` : ''
-        show(vid, v.opacity >= 0.005)
+        show(vid, v.opacity >= 0.005 || portalActive)
       }
       if (alt && altVid && Math.abs(video2.opacity - lastAlt) > 1e-3) {
         lastAlt = video2.opacity
@@ -73,6 +79,8 @@ function useStageVideo(gl: boolean, motion: boolean) {
     gsap.ticker.add(tick)
     return () => {
       gsap.ticker.remove(tick)
+      window.removeEventListener('touchstart', unlock)
+      window.removeEventListener('pointerdown', unlock)
       el.style.cssText = ''
       if (alt) alt.style.cssText = ''
       if (stone) stone.style.cssText = ''

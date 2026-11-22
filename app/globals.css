@@ -18,7 +18,7 @@
   --line: var(--graphite-800);
   --accent: var(--teal-500);
 
-  --pad: clamp(1.25rem, 4vw, 3.5rem);
+  --pad: clamp(1rem, 4vw, 3.5rem);
   --header-h: 4.5rem;
   --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
 }
@@ -52,6 +52,11 @@
   --line: var(--graphite-800);
   --accent: var(--teal-500);
   --gridline: rgb(238 235 229 / 0.06);
+  --surface-track: oklch(0.155 0.008 248 / 0.86);
+  --surface-card: oklch(0.185 0.009 248 / 0.78);
+  --surface-elevated: oklch(0.22 0.014 218 / 0.86);
+  --border-subtle: oklch(0.94 0.008 85 / 0.11);
+  --border-accent: color-mix(in oklch, var(--teal-500) 42%, transparent);
 }
 
 [data-tone='light'] {
@@ -75,8 +80,23 @@
     background: var(--graphite-950);
     color: var(--stone-50);
     font-family: var(--font-sans);
-    font-size: 17px;
+    font-size: 16px;
     line-height: 1.65;
+    overflow-x: clip;
+  }
+
+  @media (width >= 48rem) {
+    body {
+      font-size: 17px;
+    }
+  }
+
+  a,
+  button,
+  input,
+  select,
+  textarea {
+    touch-action: manipulation;
   }
 
   :focus-visible {
@@ -167,23 +187,32 @@
   }
 
   .h-hero {
-    font-size: clamp(3.25rem, 10vw, 11rem);
-    line-height: 0.9;
+    font-size: clamp(2.85rem, 10vw, 11rem);
+    line-height: 0.92;
   }
 
   .h-xl {
-    font-size: clamp(2.5rem, 6.4vw, 7rem);
+    font-size: clamp(2.15rem, 6.4vw, 7rem);
   }
 
   .h-lg {
-    font-size: clamp(2.1rem, 4.6vw, 4.75rem);
-    line-height: 1;
+    font-size: clamp(1.85rem, 4.6vw, 4.75rem);
+    line-height: 1.02;
   }
 
   .h-md {
-    font-size: clamp(1.5rem, 2.4vw, 2.25rem);
-    line-height: 1.1;
+    font-size: clamp(1.35rem, 2.4vw, 2.25rem);
+    line-height: 1.12;
     letter-spacing: -0.03em;
+  }
+
+  .no-scrollbar {
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
   }
 
   .prose-w {
@@ -297,6 +326,67 @@
     animation: dg-run 3.4s cubic-bezier(0.77, 0, 0.175, 1) infinite alternate;
   }
 
+  .surface-track {
+    background: var(--surface-track);
+    border: 1px solid var(--border-subtle);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+  }
+
+  .surface-card {
+    background: var(--surface-card);
+    border: 1px solid var(--border-subtle);
+    backdrop-filter: blur(18px);
+    -webkit-backdrop-filter: blur(18px);
+    box-shadow:
+      0 1px 0 oklch(0.96 0.005 85 / 0.05) inset,
+      0 22px 48px -24px oklch(0.08 0.01 250 / 0.72);
+  }
+
+  .surface-elevated {
+    background: var(--surface-elevated);
+    border: 1px solid var(--border-accent);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+  }
+
+  .surface-subtle {
+    background: oklch(0.165 0.008 248 / 0.56);
+    border: 1px solid oklch(0.94 0.008 85 / 0.08);
+  }
+
+  .surface-tab-active {
+    background: color-mix(in oklch, var(--teal-500) 18%, oklch(0.22 0.01 248));
+    border: 1px solid var(--border-accent);
+    box-shadow: 0 4px 14px -6px oklch(0.08 0.01 250 / 0.7);
+  }
+
+  .surface-btn {
+    background: oklch(0.21 0.009 248 / 0.85);
+    border: 1px solid var(--border-subtle);
+  }
+
+  .surface-btn:hover:not(:disabled) {
+    background: color-mix(in oklch, var(--teal-500) 14%, oklch(0.23 0.01 248));
+    border-color: var(--border-accent);
+  }
+
+  .surface-pill {
+    background: oklch(0.175 0.008 248 / 0.78);
+    border: 1px solid var(--border-subtle);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+  }
+
+  .badge-tonal {
+    background: color-mix(in oklch, var(--teal-500) 13%, oklch(0.18 0.01 248));
+    border: 1px solid color-mix(in oklch, var(--teal-500) 28%, transparent);
+  }
+
+  .stage-enter {
+    animation: stage-enter 240ms var(--ease-out) both;
+  }
+
   .skip {
     position: fixed;
     left: 1rem;
@@ -340,6 +430,132 @@
   to {
     opacity: 0;
     visibility: hidden;
+  }
+}
+
+/* Scoped animations for the About the Firm (#glance) section */
+.glance-spin {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: dg-spin 14s linear infinite;
+}
+
+.glance-spin-slow {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: dg-spin 26s linear infinite;
+}
+
+.glance-spin-rev {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: dg-spin 18s linear infinite reverse;
+}
+
+.glance-ping {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: dg-ping 3s var(--ease-out) infinite;
+}
+
+.glance-flow {
+  animation: glance-flow 2.8s linear infinite;
+}
+
+.glance-flow-long {
+  animation: glance-flow-long 4.5s linear infinite;
+}
+
+.glance-bar {
+  transform-box: fill-box;
+  transform-origin: bottom;
+  animation: glance-bar 3.2s ease-in-out infinite alternate;
+}
+
+.glance-slide-r {
+  animation: glance-slide-r 3.4s ease-in-out infinite alternate;
+}
+
+.glance-slide-l {
+  animation: glance-slide-l 3.4s ease-in-out infinite alternate;
+}
+
+.glance-num-in {
+  animation: glance-num-in 0.55s var(--ease-out) both;
+}
+
+@keyframes glance-flow {
+  from {
+    stroke-dashoffset: 180;
+  }
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+@keyframes glance-flow-long {
+  from {
+    stroke-dashoffset: 292;
+  }
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+@keyframes glance-bar {
+  from {
+    transform: scaleY(0.84);
+  }
+  to {
+    transform: scaleY(1.04);
+  }
+}
+
+@keyframes glance-slide-r {
+  from {
+    transform: translateX(-8px);
+  }
+  to {
+    transform: translateX(8px);
+  }
+}
+
+@keyframes glance-slide-l {
+  from {
+    transform: translateX(8px);
+  }
+  to {
+    transform: translateX(-8px);
+  }
+}
+
+@keyframes glance-num-in {
+  from {
+    opacity: 0;
+    transform: translateY(28px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes stage-enter {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (prefers-reduced-transparency: reduce) {
+  [data-tone='dark'] {
+    --surface-track: oklch(0.16 0.008 248);
+    --surface-card: oklch(0.19 0.009 248);
+    --surface-elevated: oklch(0.23 0.012 220);
   }
 }
 
